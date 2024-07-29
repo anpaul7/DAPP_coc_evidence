@@ -1,0 +1,1 @@
+export const DAPP_contractAddress_deploy = "0x1c91347f2A44538ce62453BEBd9Aa907C662b4bD"
