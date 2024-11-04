@@ -16,7 +16,7 @@ const config = getDefaultConfig({
   ssr: true, // If your dApp uses server side rendering (SSR)
 });
 
-//--instant conect
+//--instant connect for 
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

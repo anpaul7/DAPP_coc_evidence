@@ -9,6 +9,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useReadContract } from 'wagmi';
 import { DAPP_contractAddress_deploy } from './assets/constants';
 import { abi } from './assets/abis/DAPP_coc_evidenceABI';
+
 function App() {
   const { address, isConnected } = useAccount(); //conect to wallet
   //const [count, setCount] = useState(0)
