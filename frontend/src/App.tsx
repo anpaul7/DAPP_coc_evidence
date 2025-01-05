@@ -7,8 +7,8 @@ import './App.css'
 
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useReadContract } from 'wagmi';
-import { DAPP_contractAddress_deploy } from './assets/constants';
-import { abi } from './assets/abis/DAPP_coc_evidenceABI';
+import { contractAddress_DE_deploy } from './assets/constants';
+import { abi } from './assets/abis/coc_evidence_digitalABI';
 
 function App() {
   const { address, isConnected } = useAccount(); //conect to wallet
@@ -16,10 +16,10 @@ function App() {
   console.log(address);
 
   const {data, isLoading, refetch} = useReadContract({ //hub to contract
-    address: DAPP_contractAddress_deploy, //address of the contract
+    address: contractAddress_DE_deploy, //address of the contract deployed
     abi: abi,//abi of the contract
     functionName: "getName", //function to call on the contract
-    args: [0], //args to pass to the function
+    args: [address], //args to pass to the function, args: [address],
   })
 
   return (
@@ -33,6 +33,7 @@ function App() {
         <div><p>
           <span> Wallet Address: </span> 
           {isLoading ? (<span className='opacity-70'>Loading..."</span>) : address /*(data?.toString())*/}
+          {isLoading ? (<span className='opacity-70'>Loading2..."</span>) : (data?.toString())}
         </p></div> 
       ):(
       <div>Please connect your wallet to use the Chain-of-Custody Digital Evidence</div> )

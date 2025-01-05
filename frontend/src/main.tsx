@@ -12,7 +12,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 const config = getDefaultConfig({
   appName: 'Chain-of-Custody Digital Evidence',
   projectId: import.meta.env.VITE_PROJECT_ID,
-  chains: [localhost, hardhat, arbitrumSepolia, sepolia],
+  chains: [localhost, sepolia, arbitrumSepolia],
   ssr: true, // If your dApp uses server side rendering (SSR)
 });
 
