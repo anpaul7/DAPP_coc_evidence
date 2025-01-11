@@ -19,14 +19,14 @@ contract DigitalEvidenceContract {
     address public  owner; //wallet that deployment contract
     string public nameContract;
 
+    DataEvidence [] public arrayEvidence;
+
     constructor(){
         nameContract = "Contract for recording of digital evidence Udenar";
         owner = msg.sender; //who deployed contract
         nextId = 0;
-        createEvidence("Nonce_init","-",1,"-","-","-");
+        createEvidence("Nonce_init","-",0,"-","-","-");
     }
-
-    DataEvidence [] public arrayEvidence;
 
     //obtain data from a record: id
     mapping (uint256 => DataEvidence) public recordsEvidence;
@@ -39,6 +39,8 @@ contract DigitalEvidenceContract {
     );
     //event verified state
     event statusED(uint256 id, bool verified);
+
+   //event get_Id(uint256 id); 
 
     //---------
     modifier  onlyOwner(){
@@ -84,6 +86,8 @@ contract DigitalEvidenceContract {
     }
 
     function getId(uint256 _id) public view onlyOwner returns ( uint256 ) {
+    //function getId(uint256 _id) public returns ( uint256 ) {    
+        
         return  recordsEvidence[_id].id;
         /*
         return string(abi.encodePacked("Registro no exite: ",_id));   
@@ -101,6 +105,11 @@ contract DigitalEvidenceContract {
         return result;
     }
 
+    function getNameContract() public view returns ( string memory) {
+        string memory result = nameContract;
+        return result;
+    }
+//esta funcion revisar trae los mismos datos que mapping recordevidence
     function getRecordsEvidence() public view onlyOwner returns (DataEvidence[] memory){
         return arrayEvidence;
     }

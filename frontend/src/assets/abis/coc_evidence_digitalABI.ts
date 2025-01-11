@@ -240,6 +240,19 @@ export const abi = [
   },
   {
     "inputs": [],
+    "name": "getNameContract",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getRecordsEvidence",
     "outputs": [
       {

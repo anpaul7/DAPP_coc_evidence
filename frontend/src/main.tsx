@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import { arbitrumSepolia, hardhat, localhost, sepolia } from 'wagmi/chains';
+import { arbitrumSepolia, localhost, sepolia } from 'wagmi/chains';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
