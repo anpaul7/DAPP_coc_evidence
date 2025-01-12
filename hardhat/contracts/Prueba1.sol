@@ -22,7 +22,7 @@ contract Prueba1 {
     DataEvidence [] public arrayEvidence;
 
     constructor(){
-        nameContract = "Contract for recording of digital evidence Udenar";
+        nameContract = "Contract for recording of digital evidence and verification";
         owner = msg.sender; //who deployed contract
         nextId = 0;
         createEvidence("Nonce_init","-",0,"-","-","-");
