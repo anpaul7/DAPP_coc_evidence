@@ -29,7 +29,7 @@ function Home() {
     address: contractAddress_DE_deploy, //address of the contract deployed
     abi: abi,//abi of the contract
     functionName: "recordsEvidence", //function to call on the contract
-    args: [1], //args to pass to the function, args: [address],
+    args: [0], //args to pass to the function, args: [address],
   })
 
   //data result console 
@@ -48,6 +48,7 @@ function Home() {
 
     <h1 className='text-4xl text-white font-bold text-center flex-col'>
       Chain-of-Custody Digital Evidence</h1>
+      <p>Operations for registration, storing and tracing digital evidence in computer forensic processes.</p>
     <div className='my-5 px-4 flex-col gap-5 border-2 border #77b353 text-center items-center'>
     <div className='text-2xl my-5 px-5 flex-col  text-center items-center' ><ConnectButton /></div>
       { isConnected ? (
