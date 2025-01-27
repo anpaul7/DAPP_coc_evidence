@@ -65,11 +65,11 @@ function Register () {
           filePath: data.file_path,
           fileHash: data.file_hash
         }));
-        
+
         setTimeout(() => {
           setShowFirstForm(false);  // Hide the first form
           setShowSecondForm(true);  // Show the second form
-        }, 5000); // 5 seconds 
+        }, 1000); // 4 seconds 
 
       } else {
         console.error('Error uploading file:', data.error);
@@ -100,6 +100,26 @@ const handleChange = (e) => {
     [name]: value
   }));
 };
+//----------------------------------------
+  const handleCancel2 = () => {  // clear box data form
+    setFormData({
+      userType: '',
+      idType: '',
+      id: '',
+      names: '',
+      lastNames: '',
+      filePath: '',
+      fileHash: '',
+      datepicker: ''
+    });
+    setFile(null);
+
+    // hide and show forms
+    setTimeout(() => {
+      setShowFirstForm(true);
+      setShowSecondForm(false);
+    }, 1000); 
+  };
 //----------------------------------------
   const handleEnvio = (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
@@ -137,15 +157,15 @@ const handleChange = (e) => {
     for (let i = 1; i <= daysInMonth; i++) {
       const dayDiv = document.createElement("div");
       dayDiv.className =
-        "flex h-[38px] w-[38px] items-center justify-center rounded-[7px] border-[.5px] border-transparent text-dark hover:border-stroke hover:bg-gray-2 sm:h-[46px] sm:w-[47px] dark:text-white dark:hover:border-dark-3 dark:hover:bg-dark mb-2";
+        "flex h-[38px] w-[38px] items-center justify-center rounded-[7px] border-[.5px] border-transparent text-dark hover:border-stroke hover:bg-gray-2 sm:h-[46px] sm:w-[47px] dark:text-gray dark:hover:border-dark-3 dark:hover:bg-dark mb-2";
       dayDiv.textContent = i;
       dayDiv.addEventListener("click", () => {
         const selectedDateValue = `${i}/${month + 1}/${year}`;
         setSelectedDate(selectedDateValue);
         daysContainer
           .querySelectorAll("div")
-          .forEach((d) => d.classList.remove("bg-primary", "text-white"));
-        dayDiv.classList.add("bg-primary", "text-white", "dark:text-white");
+          .forEach((d) => d.classList.remove("bg-primary", "text-dark"));
+        dayDiv.classList.add("bg-primary", "text-gray", "dark:text-gray");
       });
       daysContainer.appendChild(dayDiv);
     }
@@ -180,8 +200,13 @@ const handleChange = (e) => {
   };
 
   const handleCancel = () => {
+    setFormData({
+      ...formData,
+      datepicker: ''
+    });
     setSelectedDate(null);
     setIsCalendarOpen(false);
+
   };
 
   const handleToggleCalendar = () => {
@@ -456,13 +481,14 @@ return (
                 value={formData.filePath}
                 onChange={handleChange}
                 autoComplete="filePath"
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-base/6"
+                readOnly
+                className="block w-full rounded-md bg-gray-100 px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-base/6"
               />
             </div>
           </div> 
           <div className="col-span-full">
             <label htmlFor="fileHash" className="block text-base/7 font-medium text-gray-900">
-              Hash generated to file
+            Hash code generated from digital evidence
             </label>
             <div className="mt-2">
               <input
@@ -472,7 +498,8 @@ return (
                 value={formData.fileHash}
                 onChange={handleChange}
                 autoComplete="fileHash"
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-base/6"
+                readOnly
+                className="block w-full rounded-md bg-gray-100 px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-base/6"
               />
             </div>
           </div> 
@@ -643,19 +670,19 @@ return (
                     {/* Days will be rendered here */}
                   </div>
                 
-                  <div className="mt-6 flex items-center justify-end gap-x-6">
+                  <div className="mt-1 flex items-center justify-center gap-x-1">
                     <button
                       id="cancelBtn"
-                      className=" rounded-md bg-indigo-600 px-3 py-2  font-semibold bg-[#2a2a2a] 
-                      flex h-[50px] w-full items-center justify-center rounded-md text-base font-medium text-white hover:bg-opacity-90"
+                      className=" rounded-md bg-indigo-600 px-2 py-2  font-semibold bg-[#2a2a2a] 
+                      flex h-[30px] w-1/3 items-center justify-center rounded-md text-base font-medium text-white hover:bg-opacity-90"
                       onClick={handleCancel}
                     >
                       Remove
                     </button>
                     <button
                       id="cancelBtn"
-                      className="rounded-md bg-indigo-600 px-3 py-2  font-semibold bg-[#1865fe] 
-                      flex h-[50px] w-full items-center justify-center rounded-md text-base font-medium text-white hover:bg-opacity-90"
+                      className="rounded-md bg-indigo-600 px-2 py-2  font-semibold bg-[#1865fe] 
+                      flex h-[30px] w-1/3 items-center justify-center rounded-md text-base font-medium text-white hover:bg-opacity-90"
                       onClick={handleApply}
                     >
                       Done
@@ -667,23 +694,22 @@ return (
           </div>
         </section>      
 
-        <div className="mt-6 flex items-center justify-end gap-x-6">
-            <button type="button" className="text-sm/6 font-semibold text-gray-900">
+        <div className="mt-6 flex items-center justify-center gap-x-6">
+            <button 
+              type="button" 
+              onClick={handleCancel2}
+              className="rounded-md bg-blue-500 px-4 py-2 text-sm-md font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
               Cancel
             </button>
             <button
               type="submit"
               onClick={handleEnvio}
-              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              className="rounded-md bg-green-500 px-3 py-2 text-sm-md font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-              Save
+              Register
             </button>
           </div>
-
-
-        <button className='bg-gray-600 text-white px-3 py-1 rounded-lg my-5 hover:bg-gray-800 text-3xl'
-          > Prueba
-        </button>
         
       </form>
     )}
