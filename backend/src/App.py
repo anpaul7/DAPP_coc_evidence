@@ -5,6 +5,7 @@ import hashlib
 from pymongo import MongoClient
 from flask_pymongo import PyMongo, ObjectId
 from dotenv import load_dotenv
+from flask_jwt_extended import create_access_token, jwt_required, JWTManager
 
 #-- call env 
 load_dotenv()
@@ -20,6 +21,9 @@ db = client[os.getenv('DB_NAME')]
 collection = db[os.getenv('COLLECTION_NAME')]
 collection2 = db[os.getenv('COLLECTION_NAME2')]
 
+#--- config JWT
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY') # key secret for token with JWT
+jwt = JWTManager(app)
 #---------------------------------------------------
 
 '''
@@ -66,7 +70,27 @@ def hash_password(password):
     return hashlib.md5(password.encode()).hexdigest()
 
 #-------------------------------------------------
+@app.route('/login', methods=['POST'])
+def login_user():
+    data = request.get_json()
+    id= data.get('id')
+    user= data.get('user')
+    password = data.get('password')
+
+    # Check if the user exists
+    existing_user = db.users.find_one({'_id':id, 'user':user, 'password':password})
+
+    if not existing_user:
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    # Generate token JWT
+    access_token = create_access_token(identity=password)
+    print(f"Token:  {access_token}")
+    return jsonify(access_token=access_token), 200
+
+#-------------------------------------------------
 @app.route('/upload', methods=['POST'])
+@jwt_required() # Protected route and JWT autentication
 def upload_file():
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
@@ -103,6 +127,7 @@ def upload_file():
 
 #---------------------------------------------------
 @app.route('/users', methods=['POST']) #create user
+@jwt_required() # Protected route and JWT autentication
 def registerUser():  
     data = request.get_json() #get data from json
 
@@ -135,7 +160,9 @@ def registerUser():
     }
     return jsonify(response_data),201
 
-@app.route('/insert', methods=['POST']) #create user
+#------------- insert evidence in db
+@app.route('/insert', methods=['POST']) #register evidence in db
+@jwt_required() # Protected route and JWT autentication
 def registerEvidence():
 
     data = request.get_json() #get data from json
@@ -172,6 +199,22 @@ def registerEvidence():
         'inserted_id': str(result.inserted_id)
     }
     return jsonify(response_data),201
+
+#------------- verify evidence in blockchain db
+@app.route('/verify', methods=['POST']) #verify evidence in db
+@jwt_required() # Protected route and JWT autentication
+def verifyEvidence():
+
+    data = request.get_json() #get data from json
+
+    # Verify if the '_id' already exists in the database
+    existing_evidence = collection.find_one({"_id": data['id']})
+    response_data = {
+        'msg': 'Evidence found in database' if existing_evidence else 'Evidence not found in database',
+        'status': bool(existing_evidence)  # Return True if the evidence exists, False otherwise
+    }
+
+    return jsonify(response_data)# Return the response true or false
 
 
 if __name__ == '__main__':

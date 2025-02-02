@@ -10,14 +10,17 @@ import { toast } from 'react-toastify';
 import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid'
 import { ChevronDownIcon } from '@heroicons/react/16/solid'
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 //import React from 'react';
 
 const API = import.meta.env.VITE_API_SERVER_FLASK;//URL server backend
-const txHash = '';
 
 function Acquisition () {
+
+  const [tokenAuth, setTokenAuth] = useState('');//authentication token
+  const [txHash, setTxHash] = useState('');// hash of the transaction registered evidence
+  //const [evidenceFound, setEvidenceFound] = useState(null);// evidence registered in db
 
   //use in button on click
   const [isRegistering, setRegisterEvidence] = useState(false); //state transaction blockchain register evidence
@@ -32,10 +35,81 @@ function Acquisition () {
   const [fileName, setFileName] = useState('');
 
   const [open, setOpen] = useState(false); //dialog register evidence
+  const [open2, setOpen2] = useState(false); //dialog evidence found in db
 
-  const registerAsk = (e) => {
+//----------------------------------------
+//---- authentication user
+  const handleAuthenticateUser= async () => { 
+    try{
+      const response = await fetch(`${API}/login`, { //submit data to server
+          method: 'POST',
+          headers:{
+              'Content-Type':'application/json'
+          },
+          body: JSON.stringify({
+            "id":123, "user":"pedro", "password":"e10adc3949ba59abbe56e057f20f883e",  
+            /*
+            "id":123, "name":"Pedross", "lastNames":"Perez", 
+            "user":"pedro", "password":"123456", "role":"administrator"
+
+            "id":456, "name":"Juan", "lastNames":"Torres", 
+            "user":"juan", "password":"456", "role":"administrator"
+            */          
+          })
+        });
+        
+        if(!response.ok){
+            throw new Error(`HTTP error login with token! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        //console.log("Response server login:", data); 
+        if (!data.access_token) {
+          throw new Error("The API did not return an access_token");
+        }
+        setTokenAuth(data.access_token); //Update the tokenAuth state
+        
+        console.log("login success, token", data.access_token);   
+    }catch(error){
+        console.error('Error authenticating user:',error);
+    }
+  };
+
+//----------------------------------------
+  const registerAsk = async (e) => { //use in button on click register evidence
     e.preventDefault(); 
-    setOpen(true);// open dialog
+
+    try{
+
+      const response = await fetch(`${API}/verify`, { //submit data to server
+          method: 'POST',
+          headers: {
+            "Authorization": `Bearer ${tokenAuth}`,
+            'Content-Type':'application/json'
+            },
+          body: JSON.stringify({
+            id: formData2.fileHash,          
+          })
+        });
+
+        const data = await response.json();
+        
+        if(!response.ok){
+            throw new Error(`HTTP error!: Verify evidence exists in BD: ${response.status}`);
+        }
+        if (data.status) {
+          setOpen2(true); // Evidence exists, show dialog no register
+        } else {
+          setOpen(true);  // Evidence not exists, show dialog register
+        }
+        //setEvidenceFound(data.status);//true or false evidence exists
+        console.log("Response if evidence exists in BD ?: ", data.status);
+        console.log(data.status);    
+        
+    }catch(error){
+        console.error('Error verifying evidence in BD:',error);
+    }
+    //setOpen(true);// open dialog register evidence
   };
 //----------------------------------------
 
@@ -64,6 +138,9 @@ function Acquisition () {
       //const response = await fetch('http://localhost:5000/upload', {
       const response = await fetch(`${API}/upload`,{
         method: 'POST',
+        headers: {
+          "Authorization": `Bearer ${tokenAuth}`
+          },
         body: formData,
       });
       
@@ -101,27 +178,33 @@ function Acquisition () {
     }
   };
 
-//----------------------------------------
-const [formData2, setFormData] = useState({
-  userType: '',
-  idType: '',
-  id: '',
-  names: '',
-  lastNames: '',
-  filePath: '',
-  fileHash: '',
-  datepicker: ''
-});
+  //----------------------------------------
+  const [formData2, setFormData] = useState({
+    userType: '',
+    idType: '',
+    id: '',
+    names: '',
+    lastNames: '',
+    filePath: '',
+    fileHash: '',
+    datepicker: ''
+  });
 
-const handleChange = (e) => {
-  const { name, value } = e.target;
-  setFormData(prevState => ({
-    ...prevState,
-    [name]: value
-  }));
-};
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
 //----------------------------------------
-  const clearForm = () => {
+  const redirectForm = () => { // redirect to form1 register evidence 
+    toast.error("Redirect to Stage 1 registration");
+    clearForm();
+    setOpen2(false)
+  };
+//----------------------------------------
+  const clearForm = () => { // clear box data form to default
     setFormData(prevState => ({
       ...prevState,
       userType: "",
@@ -136,7 +219,9 @@ const handleChange = (e) => {
 
     setFile(null);
     handleCancel();// clear date
- 
+    setTxHash('');
+    setFileName('');
+
     // hide and show forms
     setTimeout(() => {
       setShowFirstForm(true);
@@ -270,12 +355,12 @@ const handleChange = (e) => {
 
   //-------- end date
 
+  //----------------------------------------
   const registerEvidence = async (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
 
-    //const userResponse = window.confirm('Are you sure you want to register this evidence?');
-
     setRegisterEvidence(true);
+  
     setOpen(false);
 
     /*
@@ -298,13 +383,7 @@ const handleChange = (e) => {
   
       setRegisterEvidence(false);
 
-      toast.success('Evidence registered successfully!'); //notification user register evidence 
-
-      clearForm();// clear box data form
-      setFile(null);
-      setFileName('');
-      handleCancel();// clear date
-      console.log("txHash evidence registered: ", txHash);
+      
       console.log(formData2);
       
       setShowFirstForm(true);
@@ -319,9 +398,19 @@ const handleChange = (e) => {
     }
       */
     console.log(formData2);
-    console.log("Finaliza registro");
+
     handleInsertDB(); 
+
+    toast.success('Evidence registered successfully!'); //notification user register evidence 
+
+    console.log("txHash evidence registered: ", txHash);
+    clearForm();// clear box data form
+    setFile(null);
+    
+    handleCancel();// clear date
+    
     setRegisterEvidence(false);
+    console.log("Finish register evidence in blockchain");
   };
   //---------------------------------
  
@@ -331,9 +420,10 @@ const handleChange = (e) => {
 
       const response = await fetch(`${API}/insert`, { //submit data to server
           method: 'POST',
-          headers:{
-              'Content-Type':'application/json'
-          },
+          headers: {
+            "Authorization": `Bearer ${tokenAuth}`,
+            'Content-Type':'application/json'
+            },
           body: JSON.stringify({
             userType: formData2.userType,
             idType: formData2.idType,
@@ -344,23 +434,14 @@ const handleChange = (e) => {
             filePath: formData2.filePath,
             datepicker: formData2.datepicker,
             phase: 'Preservation',
-            txHash: txHash //hash of the transaction registered evidence
-
-            /*
-            "id":123, "name":"Pedross", "lastNames":"Perez", 
-            "user":"pedro", "password":"123456"
-
-            "id":456, "name":"Juan", "lastNames":"Torres", 
-            "user":"juan", "password":"456"
-            */
-            
+            txHash: txHash //hash of the transaction registered evidence            
           })
         });
 
         const data = await response.json();
         
         if(!response.ok){
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            throw new Error(`HTTP error! Status Register Evidence BD: ${response.status}`);
         }
 
         console.log("reporte data registered");
@@ -371,6 +452,12 @@ const handleChange = (e) => {
         console.error('Error:',error);
     }
   };
+//--------------------------------
+// authentication component initialization page
+  useEffect(() => {
+    handleAuthenticateUser();
+  }, []); // executed only once
+
   //-------------------------------
 return (
 
@@ -818,7 +905,7 @@ return (
               onClick={handleCancel2}
               className="rounded-md bg-blue-600 px-4 py-2 text-sm-md font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-              Clear Input
+              Clear Form
             </button>  
             <button
               type="submit"
@@ -852,8 +939,7 @@ return (
                   <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div className="sm:flex sm:items-start">
                       <div className="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:size-10">
-                       <ExclamationTriangleIcon aria-hidden="true" className="size-6 text-green-600" /> 
-                         {/*<CheckCircleIcon aria-hidden="true" className="size-6 text-green-600" /> */}
+                        <CheckCircleIcon aria-hidden="true" className="size-6 text-green-600" /> 
                       </div>
                       <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                         <DialogTitle as="h3" className="text-lg font-semibold text-gray-900 ">
@@ -890,13 +976,67 @@ return (
               </div>
             </div>
           </Dialog>
+
+          {/* Dialog evidence existing in the blockchain y bd */}
+
+          <Dialog open={open2} onClose={() => setOpen2(false)} className="relative z-10">
+            <DialogBackdrop
+              transition
+              className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+            />
+
+            <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+              <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <DialogPanel
+                  transition
+                  className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+                >
+                  <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div className="sm:flex sm:items-start">
+                      <div className="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:size-10">
+                        {/*<ExclamationTriangleIcon aria-hidden="true" className="size-6 text-red-600" /> */}
+                        <XCircleIcon aria-hidden="true" className="size-6 text-red-600 " /> 
+                      </div>
+                      <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                        <DialogTitle as="h3" className="text-lg font-semibold text-gray-900 ">
+                          Digital Evidence existing 
+                        </DialogTitle>
+                        <div className="mt-2">
+                          <p className="text-lg text-gray-500 ">
+                          The digital evidence you want to record on the blockchain <strong> already exists.</strong><br/><br/>
+                          You will be redirected to the beginning of <strong>Stage 1.</strong>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:space-x-4 sm:space-x-reverse sm:px-6 justify-center items-center">
+                  <button
+                    type="button"
+                    data-autofocus
+                    onClick={redirectForm}
+                    className="mt-3 inline-flex w-full justify-center rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-red-400 sm:mt-0 sm:w-auto"
+                  >
+                    Redirect
+                  </button>
+                  <button
+                    type="button"
+                    data-autofocus
+                    onClick={() => setOpen2(false)}
+                    className="mt-3 inline-flex w-full justify-center rounded-md bg-blue-500 px-3 py-2 text-sm font-semibold text-white ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-blue-400 sm:mt-0 sm:w-auto"
+                  >
+                    Cancel
+                  </button>    
+                                   
+                  </div>
+                </DialogPanel>
+              </div>
+            </div>
+          </Dialog>
         
       </form>
     )}
   </div>
-
-
-
 
   );
 };
