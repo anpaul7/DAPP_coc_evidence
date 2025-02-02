@@ -46,20 +46,26 @@ export const abi = [
       {
         "indexed": false,
         "internalType": "string",
+        "name": "fileHash",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "filePath",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
         "name": "dateRequest",
         "type": "string"
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "timeBlock",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "verified",
-        "type": "bool"
+        "internalType": "string",
+        "name": "phase",
+        "type": "string"
       }
     ],
     "name": "createdED",
@@ -76,12 +82,12 @@ export const abi = [
       },
       {
         "indexed": false,
-        "internalType": "bool",
-        "name": "verified",
-        "type": "bool"
+        "internalType": "string",
+        "name": "phase",
+        "type": "string"
       }
     ],
-    "name": "statusED",
+    "name": "statusPhase",
     "type": "event"
   },
   {
@@ -126,18 +132,23 @@ export const abi = [
       },
       {
         "internalType": "string",
+        "name": "fileHash",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "filePath",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
         "name": "dateRequest",
         "type": "string"
       },
       {
-        "internalType": "uint256",
-        "name": "timeBlock",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "verified",
-        "type": "bool"
+        "internalType": "string",
+        "name": "phase",
+        "type": "string"
       }
     ],
     "stateMutability": "view",
@@ -149,10 +160,21 @@ export const abi = [
         "internalType": "uint256",
         "name": "_id",
         "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_phase",
+        "type": "string"
       }
     ],
-    "name": "changeStatus",
-    "outputs": [],
+    "name": "changePhase",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -185,6 +207,16 @@ export const abi = [
       },
       {
         "internalType": "string",
+        "name": "_fileHash",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_filePath",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
         "name": "_dateRequest",
         "type": "string"
       }
@@ -201,6 +233,19 @@ export const abi = [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getAdrress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -208,12 +253,31 @@ export const abi = [
         "type": "uint256"
       }
     ],
-    "name": "getId",
+    "name": "getFileHash",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
         "type": "uint256"
+      }
+    ],
+    "name": "getFilePath",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
       }
     ],
     "stateMutability": "view",
@@ -246,92 +310,6 @@ export const abi = [
         "internalType": "string",
         "name": "",
         "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getRecordsEvidence",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "id",
-            "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "typeUser",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "typeIde",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "identification",
-            "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "names",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "lastNames",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "dateRequest",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timeBlock",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "verified",
-            "type": "bool"
-          }
-        ],
-        "internalType": "struct DataEvidence[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "nameContract",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -379,18 +357,23 @@ export const abi = [
       },
       {
         "internalType": "string",
+        "name": "fileHash",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "filePath",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
         "name": "dateRequest",
         "type": "string"
       },
       {
-        "internalType": "uint256",
-        "name": "timeBlock",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "verified",
-        "type": "bool"
+        "internalType": "string",
+        "name": "phase",
+        "type": "string"
       }
     ],
     "stateMutability": "view",

@@ -1,2 +1,2 @@
 export const contractAddress_DE_deploy = 
-"0xFa3FB79C13Ec21EA9Ab112B75C3ab55e465467F7";
+"0x3f70A822c21a0f6417008dcaF1A1780F13F4e23B";

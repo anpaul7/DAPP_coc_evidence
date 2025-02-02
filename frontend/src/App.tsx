@@ -1,8 +1,11 @@
 import {BrowserRouter, Route, Routes} from 'react-router-dom'
 
 import Navbar from './assets/components/Navbar.tsx';
-import Register from './assets/components/Register.tsx'; 
 import Home from "./assets/components/Home.tsx"; 
+import Acquisition from './assets/components/Acquisition.tsx'; 
+import Analysis from './assets/components/Analysis.tsx';
+import Documentation from './assets/components/Documentation.tsx';
+import Presentation from './assets/components/Presentation.tsx';
 
 function App() {
   return (
@@ -12,9 +15,12 @@ function App() {
 
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<Acquisition />} />
+          <Route path="/inspection" element={<Analysis />} />
+          <Route path="/report" element={<Documentation />} />
+          <Route path="/delivery" element={<Presentation />} />
         </Routes>
-      </BrowserRouter>
+      </BrowserRouter>  
 
     </div>
   );

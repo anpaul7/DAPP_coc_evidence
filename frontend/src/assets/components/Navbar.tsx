@@ -7,9 +7,10 @@ import { FaUserTie } from "react-icons/fa6";
 
 const navigation = [
   { name: 'Home', href: '/', current: true },
-  { name: 'Register', href: '/register', current: false },
-  { name: 'List', href: '/list', current: false },
-  { name: 'Verify', href: '/verify', current: false },    
+  { name: 'Acquisition', href: '/register', current: false },
+  { name: 'Analysis', href: '/inspection', current: false },
+  { name: 'Documentation', href: '/report', current: false },  
+  { name: 'Presentation', href: '/delivery', current: false },    
 ]
 
 function classNames(...classes: (string | boolean)[]): string {

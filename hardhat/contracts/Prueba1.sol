@@ -8,8 +8,9 @@ pragma solidity >=0.8.24;
     uint256 identification;
     string names;
     string lastNames;
+    string fileHash;
+    string filePath;
     string dateRequest;
-    uint256 timeBlock;
     bool verified;
 }
 
@@ -25,7 +26,7 @@ contract Prueba1 {
         nameContract = "Contract for recording of digital evidence and verification";
         owner = msg.sender; //who deployed contract
         nextId = 0;
-        createEvidence("Nonce_init","-",0,"-","-","-");
+        createEvidence("Nonce_init","-",0,"-","-","-","-","-");
     }
 
     //obtain data from a record: id
@@ -34,8 +35,9 @@ contract Prueba1 {
     //evidence add records
     event createdED(
         uint256 id, string typeUser, string typeIde, uint256 identification,
-        string names, string lastNames, string dateRequest,
-        uint256 timeBlock, bool verified
+        string names, string lastNames,
+        string fileHash, string filePath,
+        string dateRequest, bool verified
     );
     //event verified state
     event statusED(uint256 id, bool verified);
@@ -52,7 +54,8 @@ contract Prueba1 {
     function createEvidence(
         string memory _typeUser, string memory _typeIde,
         uint256 _identification, string memory _names,
-        string memory _lastNames, string memory _dateRequest
+        string memory _lastNames, string memory _fileHash, 
+        string memory _filePath, string memory _dateRequest
         ) public returns (bool){
             //require(!existsOwner(msg.sender,"owner exists"));
 
@@ -62,26 +65,29 @@ contract Prueba1 {
             require(_identification > 0, "Identification must be greater than 0");
             require(bytes(_names).length > 0, "Names cannot be empty");
             require(bytes(_lastNames).length > 0, "LastNames cannot be empty");
+            require(bytes(_fileHash).length > 0, "DateRequest cannot be empty");
+            require(bytes(_filePath).length > 0, "DateRequest cannot be empty");
             require(bytes(_dateRequest).length > 0, "DateRequest cannot be empty");
 
             recordsEvidence[nextId] = DataEvidence(
                nextId, _typeUser, _typeIde, _identification,
-               _names, _lastNames, _dateRequest, block.timestamp, false);
+               _names, _lastNames, _fileHash, _filePath,
+               _dateRequest, false);
 
             arrayEvidence.push(recordsEvidence[nextId]);
             nextId++;  
            
             //call event
             emit createdED(nextId, _typeUser, _typeIde, _identification,
-                _names, _lastNames, _dateRequest, block.timestamp, false);   
+                _names, _lastNames, _fileHash, _filePath, _dateRequest, false);   
         return true; //if record evidence is correct returns true
     }
 
-//--- funtion update state user
+//--- funtion update state verify evidence
     function changeStatus(uint256 _id) public{
-        DataEvidence memory _recordE = recordsEvidence[_id];//obtener registro
-        _recordE.verified = !_recordE.verified;//cambiar estado
-        recordsEvidence[_id].verified = _recordE.verified; //actualizar estado registro
+        DataEvidence memory _recordE = recordsEvidence[_id];// get record evidence
+        _recordE.verified = !_recordE.verified;//change state
+        recordsEvidence[_id].verified = _recordE.verified; //update state evidence
         emit statusED(_id, _recordE.verified);//event
     }
 
