@@ -2,12 +2,68 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useConnect, useReadContract } from 'wagmi';
 import { contractAddress_DE_deploy } from '../../assets/constants';
 import { abi } from '../../assets/abis/coc_evidence_digitalABI';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { FcAcceptDatabase, FcAddDatabase, FcDataBackup, FcDataConfiguration, FcDataEncryption, FcDataProtection, FcManager, FcPodiumWithSpeaker, FcReadingEbook } from "react-icons/fc";
+import LoginForm from "../../assets/components/LoginUser"; 
 
-function Home() {
+
+const API = import.meta.env.VITE_API_SERVER_FLASK;//URL server backend
+interface HomeProps {
+  tokenAuth: string | null;
+  setTokenAuth: React.Dispatch<React.SetStateAction<string | null>>;
+  setUser: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+function Home({ tokenAuth, setTokenAuth, setUser}: HomeProps) {
+
   const { address, isConnected } = useAccount(); //conect to wallet
+  //const [tokenAuth, setTokenAuth] = useState(localStorage.getItem("authToken")|| "");//authentication token
+  console.log("Wallet Address:", address);
+  //console.log("Token Auth:", tokenAuth);
 
-  console.log(address);
+//----------------------------------------
+
+//---- authentication user
+  const handleAuthenticateUser= async (user: string, password: string) => { 
+    try{
+      const response = await fetch(`${API}/login`, { //submit data to server
+          method: 'POST',
+          headers:{
+              'Content-Type':'application/json'
+          },
+          body: JSON.stringify({ user, password
+              
+            /*
+            "user":"pedro", "password":"e10adc3949ba59abbe56e057f20f883e",
+            "id":123, "name":"Pedross", "lastNames":"Perez", 
+            "user":"pedro", "password":"123456", "role":"administrator"
+
+            "id":456, "name":"Juan", "lastNames":"Torres", 
+            "user":"juan", "password":"456", "role":"administrator"
+            */          
+          })
+        });
+        
+        if(!response.ok){
+            throw new Error(`HTTP error login with token! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Response server login:", data); 
+        if (!data.access_token) {
+          throw new Error("The API did not return an access_token");
+        }
+
+        localStorage.setItem("authToken", data.access_token);//save token in local storage
+        setTokenAuth(data.access_token); //Update the tokenAuth state
+        localStorage.setItem("user", user);//save user in local storage
+        setUser(user);
+        console.log("login user: ", user); 
+
+    }catch(error){
+        console.error('Error authenticating user:',error);
+    }
+  };
 
   const {data:dataContract, /* refetch*/} = useReadContract({ //hub to contract
     address: contractAddress_DE_deploy, //address of the contract deployed
@@ -29,50 +85,100 @@ function Home() {
     address: contractAddress_DE_deploy, //address of the contract deployed
     abi: abi,//abi of the contract
     functionName: "recordsEvidence", //function to call on the contract
-    args: [0], //args to pass to the function, args: [address],
+    args: [1], //args to pass to the function, args: [address],
   })
 
   //data result console 
   useEffect(() => {
-    console.log("dataContract:", dataGetRecordsEvidence); //function result contract
-    console.log("isLoadingContract:", isLoadingContract);
-    console.log("contractError:", errorContract);
-    console.log("isSuccessContract", isSuccessContract);
-    console.log("isRefetchingGetName", isRefetchingContract);
-    console.log("___________");
-  }, [dataGetRecordsEvidence, isLoadingContract, errorContract,
-     isSuccessContract, isRefetchingContract] );
-
-  return (
-    <main className='w-full flex justify-center items-center min-h-screen flex-col ' >
-
-    <h1 className='text-4xl text-white font-bold text-center flex-col'>
-      Chain-of-Custody Digital Evidence</h1>
-      <p>Operations for registration, storing and tracing digital evidence in computer forensic processes.</p>
-    <div className='my-5 px-4 flex-col gap-5 border-2 border #77b353 text-center items-center'>
-    <div className='text-2xl my-5 px-5 flex-col  text-center items-center' ><ConnectButton /></div>
-      { isConnected ? (
-        //<div>Connected with address: {address}</div> 
-        //
-        <div className='my-5 px-4 '><p>
-            <span> Wallet Address: </span> 
-            <p className='text-red-500' >{isLoadingContract ? (<span className='opacity-70 text-white'>Loading..."</span>) : address /*(dataContract?.toString())*/}</p>
-            <p className='text-white' >{isLoadingContract ? (<span className='opacity-70'>Loading2..."</span>) : (dataContract?.toString())} </p>
-        </p></div> 
-      ):(
-      <div className='text-1xl text-red-500 text-center flex-col'>Please connect your wallet to use the Chain-of-Custody Digital Evidence</div> )
-      }
-      
-    </div>
-
-    <div className='text-gray-400'>
-      Data Records Evidence Contract: {dataGetRecordsEvidence?.toString()}
-    </div>
-    
-  </main>
-
+      console.log("dataContract:", dataGetRecordsEvidence); //function result contract
+      console.log("isLoadingContract:", isLoadingContract);
+      console.log("contractError:", errorContract);
+      console.log("isSuccessContract", isSuccessContract);
+      console.log("isRefetchingGetName", isRefetchingContract);
+      console.log("___________");
+    }, [dataGetRecordsEvidence, isLoadingContract, errorContract,
+      isSuccessContract, isRefetchingContract] 
   );
+//--------------------------------
+  // authentication component initialization page
+  useEffect(() => {  
+    const storedToken = localStorage.getItem("authToken");
+    if (storedToken) {
+      setTokenAuth(storedToken);
+    }
+  }, []); // executed only once
+
+//--------------------------------
+
+return (
+  <>
+   {/* Header <Navbar tokenAuth={tokenAuth} setTokenAuth={setTokenAuth} /> */}
+
+    <main className='w-full flex  min-h-screen ' >
+      
+      {/* Secction left bg-teal-500 */}
+
+      <div className="w-1/2 flex items-center justify-center bg-teal-500  text-white p-8">
+      
+        <div className="text-center">
+          <h1 className="text-4xl font-bold">Chain-of-Custody Digital Evidence</h1>
+          <div>
+          <FcAddDatabase className="mx-auto size-20 "/>
+          <FcDataBackup  className="mx-auto size-20 " />
+          <FcDataProtection className="mx-auto size-20 "/>
+          <FcDataEncryption className="mx-auto size-20 "/>
+          <FcAcceptDatabase className="mx-auto size-20 "/>
+          </div>
+          <div>
+          <FcPodiumWithSpeaker className="mx-auto size-20 "/>
+          <FcReadingEbook className="size-20 "/>
+          <FcManager className="size-20 "/>
+          </div>
+          
+          <p className="mt-4">
+            Operations for registration, storing and tracing digital evidence in computer forensic processes.
+          </p>
+          <div className="mt-4 text-black">
+            Data Records Evidence Contract: {dataGetRecordsEvidence?.toString()}
+          </div>
+        </div>
+      </div>
+      
+      {/* Section right */}
+
+      <div className="w-1/2 flex flex-col justify-center items-center bg-gray-900 text-white p-1">
+        
+        <LoginForm onLogin={handleAuthenticateUser} />
+
+        {tokenAuth ? (
+          <>
+            <div className="mt-8">
+              <ConnectButton />
+            </div>
+            <div>
+              {isConnected ? (
+                <div className="my-5 px-4">
+                  <p>
+                    <span> Wallet Address: </span>
+                    <p className="text-red-500">{isLoadingContract ? (<span className="opacity-70 text-white">Loading..."</span>) : address}</p>
+                    <p className="text-white">{isLoadingContract ? (<span className="opacity-70">Loading2..."</span>) : (dataContract?.toString())}</p>
+                  </p>
+                </div>
+              ) : (
+                <div className="text-1xl text-red-500 text-center flex-col">
+                  Please connect your wallet to use the Chain-of-Custody Digital Evidence
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <h2 className="text-3xl font-bold text-center">Por favor, inicie sesión</h2>
+        )}
+
+      </div>
+    </main>
+  </>
+);
  
 };
-
 export default Home

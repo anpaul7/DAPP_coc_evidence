@@ -26,15 +26,6 @@ app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY') # key secret for toke
 jwt = JWTManager(app)
 #---------------------------------------------------
 
-'''
-@app.after_request
-def apply_cors(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-    return response
-'''
-
 #-- Config the upload folder
 UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -73,12 +64,13 @@ def hash_password(password):
 @app.route('/login', methods=['POST'])
 def login_user():
     data = request.get_json()
-    id= data.get('id')
+    #id= data.get('id')
     user= data.get('user')
     password = data.get('password')
 
+    print(f"Token:  {user} - {password}")
     # Check if the user exists
-    existing_user = db.users.find_one({'_id':id, 'user':user, 'password':password})
+    existing_user = db.users.find_one({'user':user, 'password':hash_password(password)})
 
     if not existing_user:
         return jsonify({"error": "Invalid credentials"}), 401

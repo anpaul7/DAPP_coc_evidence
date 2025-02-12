@@ -1,4 +1,5 @@
-import {BrowserRouter, Route, Routes} from 'react-router-dom'
+import {BrowserRouter, Route, Routes} from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 import Navbar from './assets/components/Navbar.tsx';
 import Home from "./assets/components/Home.tsx"; 
@@ -8,13 +9,29 @@ import Documentation from './assets/components/Documentation.tsx';
 import Presentation from './assets/components/Presentation.tsx';
 
 function App() {
+  
+  const [tokenAuth, setTokenAuth] = useState<string | null>(localStorage.getItem("authToken"));
+  const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('authToken');
+    const storedUser = localStorage.getItem('user');
+
+    if (storedToken) {
+      setTokenAuth(storedToken);
+    }
+    if (storedUser) {
+      setUser(storedUser);
+    }
+  }, []);
+//----------------------------------------
   return (
     <div className="flex flex-col">
       <BrowserRouter>
-        <Navbar />
+        <Navbar tokenAuth={tokenAuth} setTokenAuth={setTokenAuth} user={user} setUser={setUser}/>
 
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home tokenAuth={tokenAuth} setTokenAuth={setTokenAuth}  setUser={setUser}/>} />
           <Route path="/register" element={<Acquisition />} />
           <Route path="/inspection" element={<Analysis />} />
           <Route path="/report" element={<Documentation />} />
