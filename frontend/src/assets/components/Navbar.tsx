@@ -3,15 +3,14 @@ import { Disclosure, DisclosureButton } from '@headlessui/react'
 import { Bars3Icon,  XMarkIcon } from '@heroicons/react/24/outline'
 import { useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { FaUserTie } from "react-icons/fa6";
 import { FcBusinessman } from "react-icons/fc";
 
 const navigation = [
-  { name: 'Home', href: '/', current: true },
-  { name: 'Acquisition', href: '/register', current: false },
-  { name: 'Analysis', href: '/inspection', current: false },
-  { name: 'Documentation', href: '/report', current: false },  
-  { name: 'Presentation', href: '/delivery', current: false },    
+  { name: 'Home', href: '/', current: true, roles: ['administrator', 'forense', 'lawyer','judge','user' ] },
+  { name: 'Acquisition', href: '/register', roles: ['administrator','forense'] },
+  { name: 'Analysis', href: '/inspection', roles: ['administrator', 'forense', ] },
+  { name: 'Documentation', href: '/report', roles: ['administrator', 'forense', 'lawyer'] }, 
+  { name: 'Presentation', href: '/delivery', roles: ['administrator', 'judge', ] },   
 ]
 
 function classNames(...classes: (string | boolean)[]): string {
@@ -23,14 +22,14 @@ interface NavbarProps {
   setTokenAuth: React.Dispatch<React.SetStateAction<string | null>>;
   user: string | null;
   setUser: React.Dispatch<React.SetStateAction<string | null>>;
+  role: string | null;
+  setRole: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-export  function Navbar({ tokenAuth, setTokenAuth, user, setUser }: NavbarProps) {
+export  function Navbar({ tokenAuth, setTokenAuth, user, setUser, role, setRole }: NavbarProps) {
   
-  console.log("Navbar tokenAuth:", tokenAuth);
   console.log("Navbar setTokenAuth:", setTokenAuth);
 
- // const [tokenAuth, setTokenAuth] = useState<string | null>(localStorage.getItem("authToken"));
   const location = useLocation(); // Get the current location URL
   const navigate = useNavigate();
 
@@ -39,8 +38,10 @@ export  function Navbar({ tokenAuth, setTokenAuth, user, setUser }: NavbarProps)
 const handleLogout = () => {
   localStorage.removeItem("authToken"); // Delete the authentication token
   localStorage.removeItem("user");
+  localStorage.removeItem("role");
   setTokenAuth(null);
   setUser(null);
+  setRole(null);
   navigate("/"); // Redirigir al inicio de sesión
 };
 //----------------------------------------
@@ -64,7 +65,14 @@ const handleLogout = () => {
             </div>
             <div className="hidden sm:ml-6 sm:block">
               <div className="flex space-x-3 ">
-                {navigation.map((item) => (
+                {navigation
+                  .filter(item => {
+                    if (item.name === 'Home') {
+                      return true; 
+                    }
+                    return role ? item.roles.includes(role) : false; 
+                  })
+                  .map((item) => (
                   <Link
                   key={item.name}
                   to={item.href}

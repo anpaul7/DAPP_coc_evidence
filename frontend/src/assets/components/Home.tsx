@@ -2,19 +2,21 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useConnect, useReadContract } from 'wagmi';
 import { contractAddress_DE_deploy } from '../../assets/constants';
 import { abi } from '../../assets/abis/coc_evidence_digitalABI';
+import homeImage from '../../assets/images/home1.jpeg';
 import { useEffect, useState } from 'react';
-import { FcAcceptDatabase, FcAddDatabase, FcDataBackup, FcDataConfiguration, FcDataEncryption, FcDataProtection, FcManager, FcPodiumWithSpeaker, FcReadingEbook } from "react-icons/fc";
+import { FcAcceptDatabase, FcAddDatabase, FcAdvance, FcDataBackup, FcDataConfiguration, FcDataEncryption, FcDataProtection, FcDataRecovery, FcDisclaimer, FcFinePrint, FcFolder, FcImageFile, FcManager, FcMultipleDevices, FcOk, FcPodiumWithSpeaker, FcPrivacy, FcReadingEbook, FcSafe } from "react-icons/fc";
 import LoginForm from "../../assets/components/LoginUser"; 
-
+import { toast } from 'react-toastify';
 
 const API = import.meta.env.VITE_API_SERVER_FLASK;//URL server backend
 interface HomeProps {
   tokenAuth: string | null;
   setTokenAuth: React.Dispatch<React.SetStateAction<string | null>>;
   setUser: React.Dispatch<React.SetStateAction<string | null>>;
+  setRole: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-function Home({ tokenAuth, setTokenAuth, setUser}: HomeProps) {
+function Home({ tokenAuth, setTokenAuth, setUser, setRole}: HomeProps) {
 
   const { address, isConnected } = useAccount(); //conect to wallet
   //const [tokenAuth, setTokenAuth] = useState(localStorage.getItem("authToken")|| "");//authentication token
@@ -24,7 +26,7 @@ function Home({ tokenAuth, setTokenAuth, setUser}: HomeProps) {
 //----------------------------------------
 
 //---- authentication user
-  const handleAuthenticateUser= async (user: string, password: string) => { 
+  const handleAuthenticateUser= async (user: string, password: string, resetFieldsLogin:()=>void) => { 
     try{
       const response = await fetch(`${API}/login`, { //submit data to server
           method: 'POST',
@@ -43,22 +45,35 @@ function Home({ tokenAuth, setTokenAuth, setUser}: HomeProps) {
             */          
           })
         });
-        
-        if(!response.ok){
-            throw new Error(`HTTP error login with token! Status: ${response.status}`);
+
+        if(!response.ok){ //set variable in local storage and update state
+          toast.error('Incorrect credentials. Try again!!!', { autoClose: 2000 });
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("user");
+          localStorage.removeItem("role");
+          setTokenAuth(null);
+          setUser(null);
+          setRole(null);
+          throw new Error(`HTTP error login and token! Status: ${response.status}`);     
         }
 
         const data = await response.json();
         console.log("Response server login:", data); 
-        if (!data.access_token) {
-          throw new Error("The API did not return an access_token");
+        if (!data.access_token || !data.role) {
+          toast.error('The session token has expired. Sign in again. revisar!!', { autoClose: 2000 });
+          throw new Error("The API did not return an access_token and role");
         }
 
         localStorage.setItem("authToken", data.access_token);//save token in local storage
-        setTokenAuth(data.access_token); //Update the tokenAuth state
         localStorage.setItem("user", user);//save user in local storage
+        localStorage.setItem("role", data.role);
+        setTokenAuth(data.access_token); //Update the tokenAuth state
         setUser(user);
-        console.log("login user: ", user); 
+        setRole(data.role);
+
+        resetFieldsLogin(); //clear fields form login user
+        //toast.success('Successful login', { autoClose: 2000 });
+        console.log("login user role: ", data.role); 
 
     }catch(error){
         console.error('Error authenticating user:',error);
@@ -106,7 +121,7 @@ function Home({ tokenAuth, setTokenAuth, setUser}: HomeProps) {
     if (storedToken) {
       setTokenAuth(storedToken);
     }
-  }, []); // executed only once
+  }, [setTokenAuth]); // executed only once
 
 //--------------------------------
 
@@ -116,25 +131,63 @@ return (
 
     <main className='w-full flex  min-h-screen ' >
       
-      {/* Secction left bg-teal-500 */}
+      {/* Secction left 010f1f*/}
 
-      <div className="w-1/2 flex items-center justify-center bg-teal-500  text-white p-8">
-      
+      <div className="w-1/2 flex items-center justify-center bg-[#010f1f] text-white p-8">
+
         <div className="text-center">
           <h1 className="text-4xl font-bold">Chain-of-Custody Digital Evidence</h1>
-          <div>
-          <FcAddDatabase className="mx-auto size-20 "/>
-          <FcDataBackup  className="mx-auto size-20 " />
-          <FcDataProtection className="mx-auto size-20 "/>
-          <FcDataEncryption className="mx-auto size-20 "/>
-          <FcAcceptDatabase className="mx-auto size-20 "/>
+          <div className="mt-4">
+            <img src={homeImage} alt="Evidence" className="w-30 h-auto mx-auto rounded-lg shadow-lg" />
           </div>
-          <div>
-          <FcPodiumWithSpeaker className="mx-auto size-20 "/>
-          <FcReadingEbook className="size-20 "/>
-          <FcManager className="size-20 "/>
+          {/* 
+          <div className="grid grid-cols-9 items-center justify-center w-full mt-4 gap-x-8">
+              <div className="flex flex-col items-center space-y-4">
+              
+              </div>
+              <div className="flex flex-col items-center space-y-4">
+              
+            </div> 
+            <div className="flex flex-col items-center space-y-4">
+              <FcFolder  className="size-14" />
+              <FcMultipleDevices className="size-20" />
+              <FcImageFile   className="size-14" />
+            </div>
+            
+            
+            <div className="flex flex-col items-center space-y-4">
+              <FcAdvance className="size-14" />
+            </div>
+              <div className="flex flex-col items-center space-y-4">
+                <FcDataRecovery className="size-20 "/>
+                <FcDataEncryption className="mx-auto size-20 "/>
+                <FcDataConfiguration className="mx-auto size-20 "/>
+                <FcDataBackup  className="mx-auto size-20 " />
+                <FcAcceptDatabase className="mx-auto size-20 "/>
+              </div>
+              <div className="flex flex-col items-center space-y-4">
+                <FcAdvance className=" size-14 "/>
+              </div>
+              
+              <div className="flex flex-col items-center space-y-2">
+              <FcReadingEbook className="size-20 "/> 
+                
+                <FcManager className="size-20"/>
+              </div>
+              <div className="flex flex-col items-center space-y-0">
+                <FcPodiumWithSpeaker className=" size-20  "/>
+                <div>
+                <FcOk className=" flex size-5 flex "/>
+                <FcDisclaimer className="flex size-5 flex "/>
+                </div>
+              </div>   
+              <div className="flex flex-col items-center space-y-4">
+                
+              </div>
+                    
+            
           </div>
-          
+          */}  
           <p className="mt-4">
             Operations for registration, storing and tracing digital evidence in computer forensic processes.
           </p>
@@ -146,7 +199,7 @@ return (
       
       {/* Section right */}
 
-      <div className="w-1/2 flex flex-col justify-center items-center bg-gray-900 text-white p-1">
+      <div className="w-1/2 flex flex-col justify-start items-center bg-gray-900 text-white p-1 mt-20">
         
         <LoginForm onLogin={handleAuthenticateUser} />
 

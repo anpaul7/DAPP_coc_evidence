@@ -3,8 +3,7 @@
 @tailwind utilities;
 
 :root {
-  background-color: #111827; /* bg-gray-900 en Tailwind */
-
+  background-color: #111827; /* bg-gray-900 en Tailwind #010f1f, 111827*/
 }
 
 /*

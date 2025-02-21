@@ -5,9 +5,14 @@ const LoginUser = ({ onLogin }) => {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   
+  const resetFieldsLogin = () => {
+    setUser("");
+    setPassword("");
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault(); // 
-    onLogin(user, password); // pass the user and password to the parent component in home
+    onLogin(user, password, resetFieldsLogin); // pass the user and password to the parent component in home
   };
 
 return (

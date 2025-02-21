@@ -12,26 +12,29 @@ function App() {
   
   const [tokenAuth, setTokenAuth] = useState<string | null>(localStorage.getItem("authToken"));
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
+  const [role, setRole] = useState<string | null>(localStorage.getItem("role"));
 
   useEffect(() => {
     const storedToken = localStorage.getItem('authToken');
     const storedUser = localStorage.getItem('user');
+    const storedRole = localStorage.getItem("role");
 
-    if (storedToken) {
-      setTokenAuth(storedToken);
-    }
-    if (storedUser) {
-      setUser(storedUser);
-    }
+    if (storedToken) setTokenAuth(storedToken);
+    if (storedUser) setUser(storedUser);
+    if (storedRole) setRole(storedRole);
+
   }, []);
 //----------------------------------------
   return (
     <div className="flex flex-col">
       <BrowserRouter>
-        <Navbar tokenAuth={tokenAuth} setTokenAuth={setTokenAuth} user={user} setUser={setUser}/>
+        <Navbar 
+        tokenAuth={tokenAuth} setTokenAuth={setTokenAuth} 
+        user={user} setUser={setUser} 
+        role={role} setRole={setRole} />
 
         <Routes>
-          <Route path="/" element={<Home tokenAuth={tokenAuth} setTokenAuth={setTokenAuth}  setUser={setUser}/>} />
+          <Route path="/" element={<Home tokenAuth={tokenAuth} setTokenAuth={setTokenAuth} setUser={setUser} setRole={setRole}/>} />
           <Route path="/register" element={<Acquisition />} />
           <Route path="/inspection" element={<Analysis />} />
           <Route path="/report" element={<Documentation />} />

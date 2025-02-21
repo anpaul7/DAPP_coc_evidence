@@ -75,47 +75,62 @@ def login_user():
     if not existing_user:
         return jsonify({"error": "Invalid credentials"}), 401
 
-    # Generate token JWT
-    access_token = create_access_token(identity=password)
+    # Get the user role - user role default
+    user_role = existing_user.get('role','user')
+    
+    # Generate token JWT with user role
+    access_token = create_access_token(identity=user, additional_claims={'role': user_role})
     print(f"Token:  {access_token}")
-    return jsonify(access_token=access_token), 200
+    print(f"Role:  {user_role}")
+    return jsonify(access_token=access_token, role=user_role), 200
 
 #-------------------------------------------------
 @app.route('/upload', methods=['POST'])
 @jwt_required() # Protected route and JWT autentication
 def upload_file():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
+    try:
+        if 'file' not in request.files:
+            return jsonify({"Error": "No file sent"}), 400
 
-    file = request.files['file']
-    
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
-    
-    replace_filename = replace_whitespace(file.filename)
+        file = request.files['file']
+        
+        if file.filename == '':
+            return jsonify({"Error": "No selected file"}), 401
+        
+        replace_filename = replace_whitespace(file.filename)
 
-    # Generate the hash
-    file_hash = generate_file_hash(file)
-    # Reset the file cursor to the beginning
-    file.seek(0)
+        # Generate the hash
+        file_hash = generate_file_hash(file)
+        # Reset the file cursor to the beginning
+        file.seek(0)
 
-    # Get the original filename
-    original_filepath = os.path.join(app.config['UPLOAD_FOLDER'], replace_filename)
+        print(f"Verify hash existing:  {file_hash} - ok")
+        # Check if the hash exists
+        existing_hash = db.digitalevidence.find_one({'_id':file_hash})
 
-    # Generate a unique filename
-    unique_filepath = get_unique_filename(original_filepath)
-    
-    # Save the file in 'uploads'
-    file.save(unique_filepath)
+        if existing_hash:
+            return jsonify({"Error": "Evidence already exists in database"}), 402
+        else:
+            # Get the original filename
+            original_filepath = os.path.join(app.config['UPLOAD_FOLDER'], replace_filename)
 
-    # Imprimir la ruta del archivo en consola
-    print(f"Digital evidence file uploaded: {unique_filepath}")
-    print(f"Generated digital evidence hash: {file_hash}")
+            # Generate a unique filename
+            unique_filepath = get_unique_filename(original_filepath)
+            
+            # Save the file in 'uploads'
+            file.save(unique_filepath)
 
-    return jsonify({"message": " Digital evidence uploaded and hash generated successfully", 
-                    "file_path": unique_filepath,
-                    "file_hash": file_hash
-        }), 201
+            # Print the uploaded file details
+            print(f"Digital evidence file uploaded: {unique_filepath}")
+            print(f"Generated digital evidence hash: {file_hash}")
+
+            return jsonify({"message": " Digital evidence uploaded and hash generated successfully", 
+                            "file_path": unique_filepath,
+                            "file_hash": file_hash
+                }), 201
+    except Exception as e:
+        print(f"Error in upload_file: {str(e)}")
+        return jsonify({"Error": "Internal Server Error", "Details": str(e)}), 500
 
 #---------------------------------------------------
 @app.route('/users', methods=['POST']) #create user
@@ -207,6 +222,19 @@ def verifyEvidence():
     }
 
     return jsonify(response_data)# Return the response true or false
+
+@app.route('/verifyHash', methods=['POST']) #verify hash in db
+@jwt_required() # Protected route and JWT autentication
+def verifyHash():
+
+    data = request.get_json() #get data from json
+
+    # Verify if the '_id' already exists in the database
+    existing_evidence = collection.find_one({"_id": data['id']})
+    response_data = {
+        'msg': 'Evidence found in database' if existing_evidence else 'Evidence not found in database',
+        'status': bool(existing_evidence)  # Return True if the evidence exists, False otherwise
+    }
 
 
 if __name__ == '__main__':
