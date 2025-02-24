@@ -7,7 +7,7 @@ import { FcBusinessman } from "react-icons/fc";
 
 const navigation = [
   { name: 'Home', href: '/', current: true, roles: ['administrator', 'forense', 'lawyer','judge','user' ] },
-  { name: 'Acquisition', href: '/register', roles: ['administrator','forense'] },
+  { name: 'Register', href: '/register', roles: ['administrator','forense'] },
   { name: 'Analysis', href: '/inspection', roles: ['administrator', 'forense', ] },
   { name: 'Documentation', href: '/report', roles: ['administrator', 'forense', 'lawyer'] }, 
   { name: 'Presentation', href: '/delivery', roles: ['administrator', 'judge', ] },   
@@ -46,7 +46,7 @@ const handleLogout = () => {
 };
 //----------------------------------------
   return (
-    <Disclosure as="nav" className="bg-gray-800">
+    <Disclosure as="nav" className="bg-[#012068]">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">

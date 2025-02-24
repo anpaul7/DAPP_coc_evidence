@@ -4,7 +4,6 @@ import { contractAddress_DE_deploy } from '../../assets/constants';
 import { abi } from '../../assets/abis/coc_evidence_digitalABI';
 import homeImage from '../../assets/images/home1.jpeg';
 import { useEffect, useState } from 'react';
-import { FcAcceptDatabase, FcAddDatabase, FcAdvance, FcDataBackup, FcDataConfiguration, FcDataEncryption, FcDataProtection, FcDataRecovery, FcDisclaimer, FcFinePrint, FcFolder, FcImageFile, FcManager, FcMultipleDevices, FcOk, FcPodiumWithSpeaker, FcPrivacy, FcReadingEbook, FcSafe } from "react-icons/fc";
 import LoginForm from "../../assets/components/LoginUser"; 
 import { toast } from 'react-toastify';
 
