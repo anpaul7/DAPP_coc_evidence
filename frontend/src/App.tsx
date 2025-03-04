@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 
 import Navbar from './assets/components/Navbar.tsx';
 import Home from "./assets/components/Home.tsx"; 
-import Acquisition from './assets/components/Acquisition.tsx'; 
+import Identification from './assets/components/Identification.tsx'; 
+import Preservation from './assets/components/Preservation.tsx';
 import Analysis from './assets/components/Analysis.tsx';
-import Documentation from './assets/components/Documentation.tsx';
 import Presentation from './assets/components/Presentation.tsx';
 
 function App() {
@@ -35,10 +35,10 @@ function App() {
 
         <Routes>
           <Route path="/" element={<Home tokenAuth={tokenAuth} setTokenAuth={setTokenAuth} setUser={setUser} setRole={setRole}/>} />
-          <Route path="/register" element={<Acquisition />} />
-          <Route path="/inspection" element={<Analysis />} />
-          <Route path="/report" element={<Documentation />} />
-          <Route path="/delivery" element={<Presentation />} />
+          <Route path="/identification" element={<Identification />} />
+          <Route path="/preservation" element={<Preservation />} />
+          <Route path="/analysis" element={<Analysis />} />
+          <Route path="/presentation" element={<Presentation />} />
         </Routes>
       </BrowserRouter>  
 

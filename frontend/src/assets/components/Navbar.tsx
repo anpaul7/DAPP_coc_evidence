@@ -7,10 +7,10 @@ import { FcBusinessman } from "react-icons/fc";
 
 const navigation = [
   { name: 'Home', href: '/', current: true, roles: ['administrator', 'forense', 'lawyer','judge','user' ] },
-  { name: 'Register', href: '/register', roles: ['administrator','forense'] },
-  { name: 'Analysis', href: '/inspection', roles: ['administrator', 'forense', ] },
-  { name: 'Documentation', href: '/report', roles: ['administrator', 'forense', 'lawyer'] }, 
-  { name: 'Presentation', href: '/delivery', roles: ['administrator', 'judge', ] },   
+  { name: 'Identification', href: '/identification', roles: ['administrator','forense'] },
+  { name: 'Preservation', href: '/preservation', roles: ['administrator', 'forense', ] },
+  { name: 'Analysis', href: '/analysis', roles: ['administrator', 'forense', 'lawyer'] }, 
+  { name: 'Presentation', href: '/presentation', roles: ['administrator','forense','judge', ] },   
 ]
 
 function classNames(...classes: (string | boolean)[]): string {
