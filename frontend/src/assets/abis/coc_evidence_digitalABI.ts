@@ -8,7 +8,7 @@ export const abi = [
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "uint256",
         "name": "id",
         "type": "uint256"
@@ -16,19 +16,74 @@ export const abi = [
       {
         "indexed": false,
         "internalType": "string",
-        "name": "typeUser",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "typeIde",
+        "name": "hashEvidence",
         "type": "string"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "identification",
+        "name": "caseNumber",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "location",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "device",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "evidenceType",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "filePath",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "registrationDate",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "methodAdquisition",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "noteEvidence",
+        "type": "string"
+      }
+    ],
+    "name": "createdDataEvidence",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "userId",
         "type": "uint256"
       },
       {
@@ -46,19 +101,7 @@ export const abi = [
       {
         "indexed": false,
         "internalType": "string",
-        "name": "fileHash",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "filePath",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "dateRequest",
+        "name": "userType",
         "type": "string"
       },
       {
@@ -66,16 +109,40 @@ export const abi = [
         "internalType": "string",
         "name": "phase",
         "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "state",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "stateUpdateDate",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "technicalReport",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "executiveReport",
+        "type": "string"
       }
     ],
-    "name": "createdED",
+    "name": "createdDetailsEvidence",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "uint256",
         "name": "id",
         "type": "uint256"
@@ -85,9 +152,64 @@ export const abi = [
         "internalType": "string",
         "name": "phase",
         "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "state",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "stateUpdateDate",
+        "type": "string"
       }
     ],
-    "name": "statusPhase",
+    "name": "eventUpdatePhase",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "phase",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "state",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "stateUpdateDate",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "technicalReport",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "executiveReport",
+        "type": "string"
+      }
+    ],
+    "name": "eventUpdatePresentationPhase",
     "type": "event"
   },
   {
@@ -101,54 +223,120 @@ export const abi = [
     "name": "arrayEvidence",
     "outputs": [
       {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "hashEvidence",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "caseNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "location",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "device",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "evidenceType",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "filePath",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "registrationDate",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct DataEvidence",
+        "name": "dataEvidence",
+        "type": "tuple"
       },
       {
-        "internalType": "string",
-        "name": "typeUser",
-        "type": "string"
+        "components": [
+          {
+            "internalType": "string",
+            "name": "methodAdquisition",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "noteEvidence",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "userId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "names",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "lastNames",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "userType",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct DetailsEvidence",
+        "name": "detailsEvidence",
+        "type": "tuple"
       },
       {
-        "internalType": "string",
-        "name": "typeIde",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "identification",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "names",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "lastNames",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "fileHash",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "filePath",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "dateRequest",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "phase",
-        "type": "string"
+        "components": [
+          {
+            "internalType": "string",
+            "name": "phase",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "state",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "stateUpdateDate",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "technicalReport",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "executiveReport",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct PhaseEvidence",
+        "name": "phaseEvidence",
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
@@ -157,68 +345,120 @@ export const abi = [
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "hashEvidence",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "caseNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "location",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "device",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "evidenceType",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "filePath",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "registrationDate",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct DataEvidence",
+        "name": "_dataEvidence",
+        "type": "tuple"
       },
       {
-        "internalType": "string",
-        "name": "_phase",
-        "type": "string"
-      }
-    ],
-    "name": "changePhase",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_typeUser",
-        "type": "string"
+        "components": [
+          {
+            "internalType": "string",
+            "name": "methodAdquisition",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "noteEvidence",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "userId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "names",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "lastNames",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "userType",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct DetailsEvidence",
+        "name": "_detailsEvidence",
+        "type": "tuple"
       },
       {
-        "internalType": "string",
-        "name": "_typeIde",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_identification",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "_names",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_lastNames",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_fileHash",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_filePath",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_dateRequest",
-        "type": "string"
+        "components": [
+          {
+            "internalType": "string",
+            "name": "phase",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "state",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "stateUpdateDate",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "technicalReport",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "executiveReport",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct PhaseEvidence",
+        "name": "_phaseEvidence",
+        "type": "tuple"
       }
     ],
     "name": "createEvidence",
@@ -253,12 +493,143 @@ export const abi = [
         "type": "uint256"
       }
     ],
-    "name": "getFileHash",
+    "name": "getCaseNumber",
     "outputs": [
       {
-        "internalType": "string",
+        "internalType": "uint256",
         "name": "",
-        "type": "string"
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getEvidenciaAll",
+    "outputs": [
+      {
+        "components": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "hashEvidence",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "caseNumber",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "location",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "device",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "evidenceType",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "filePath",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "registrationDate",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct DataEvidence",
+            "name": "dataEvidence",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "methodAdquisition",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "noteEvidence",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "userId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "names",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "lastNames",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "userType",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct DetailsEvidence",
+            "name": "detailsEvidence",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "phase",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "state",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "stateUpdateDate",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "technicalReport",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "executiveReport",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct PhaseEvidence",
+            "name": "phaseEvidence",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct FullEvidence[]",
+        "name": "",
+        "type": "tuple[]"
       }
     ],
     "stateMutability": "view",
@@ -291,7 +662,7 @@ export const abi = [
         "type": "uint256"
       }
     ],
-    "name": "getName",
+    "name": "getHashEvidence",
     "outputs": [
       {
         "internalType": "string",
@@ -319,6 +690,114 @@ export const abi = [
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "getPhase",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getRegisterId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "getRegistrationDate",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "getState",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "getStateUpdateDate",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "getUserId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "",
         "type": "uint256"
       }
@@ -326,57 +805,201 @@ export const abi = [
     "name": "recordsEvidence",
     "outputs": [
       {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "hashEvidence",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "caseNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "location",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "device",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "evidenceType",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "filePath",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "registrationDate",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct DataEvidence",
+        "name": "dataEvidence",
+        "type": "tuple"
       },
       {
-        "internalType": "string",
-        "name": "typeUser",
-        "type": "string"
+        "components": [
+          {
+            "internalType": "string",
+            "name": "methodAdquisition",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "noteEvidence",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "userId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "names",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "lastNames",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "userType",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct DetailsEvidence",
+        "name": "detailsEvidence",
+        "type": "tuple"
       },
       {
-        "internalType": "string",
-        "name": "typeIde",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "identification",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "names",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "lastNames",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "fileHash",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "filePath",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "dateRequest",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "phase",
-        "type": "string"
+        "components": [
+          {
+            "internalType": "string",
+            "name": "phase",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "state",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "stateUpdateDate",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "technicalReport",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "executiveReport",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct PhaseEvidence",
+        "name": "phaseEvidence",
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_phase",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_state",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_stateUpdateDate",
+        "type": "string"
+      }
+    ],
+    "name": "updatePhase",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_phase",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_state",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_stateUpdateDate",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_technicalReport",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_executiveReport",
+        "type": "string"
+      }
+    ],
+    "name": "updatePresentationPhase",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]

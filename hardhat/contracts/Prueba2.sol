@@ -11,14 +11,14 @@ pragma solidity >=0.8.24;
     string fileHash;
     string filePath;
     string dateRequest;
-    string phase;
+    bool verified;
 }
 
 contract Prueba2 {
 
-    uint256 private nextId; //counter records 
-    address private owner; //wallet that deployment contract
-    string private  nameContract;
+    uint256 private nextId; //contador registros
+    address public  owner; //wallet that deployment contract
+    string public nameContract;
 
     DataEvidence [] public arrayEvidence;
 
@@ -26,25 +26,27 @@ contract Prueba2 {
         nameContract = "Contract for recording of digital evidence and verification";
         owner = msg.sender; //who deployed contract
         nextId = 0;
-        createEvidence("Nonce_init","-",1,"-","-","-","-","-");
+        createEvidence("Nonce_init","-",0,"-","-","-","-","-");
     }
 
     //obtain data from a record: id
     mapping (uint256 => DataEvidence) public recordsEvidence;
-
+  
     //evidence add records
     event createdED(
         uint256 id, string typeUser, string typeIde, uint256 identification,
         string names, string lastNames,
         string fileHash, string filePath,
-        string dateRequest, string phase
+        string dateRequest, bool verified
     );
     //event verified state
-    event statusPhase(uint256 id, string phase);
+    event statusED(uint256 id, bool verified);
+
+   //event get_Id(uint256 id); 
 
     //---------
     modifier  onlyOwner(){
-        require(msg.sender == owner, "Only the owner can record digital evidence");
+        require(msg.sender == owner, "only the owner can execute task");
         _;
     }
 //------------------------------------------------------
@@ -70,58 +72,29 @@ contract Prueba2 {
             recordsEvidence[nextId] = DataEvidence(
                nextId, _typeUser, _typeIde, _identification,
                _names, _lastNames, _fileHash, _filePath,
-               _dateRequest, "Preservation");
+               _dateRequest, false);
 
             arrayEvidence.push(recordsEvidence[nextId]);
             nextId++;  
            
             //call event
             emit createdED(nextId, _typeUser, _typeIde, _identification,
-                _names, _lastNames, _fileHash, _filePath, _dateRequest, "Preservation");   
+                _names, _lastNames, _fileHash, _filePath, _dateRequest, false);   
         return true; //if record evidence is correct returns true
     }
 
-//--- funtion Evidence phase update
-    function changePhase(uint256 _id, string memory _phase) public returns (bool) {
-        require(_id >= 0, "Id cannot be empty");
-        require(bytes(_phase).length > 0, "Phase cannot be empty");
-        require(_id < nextId, "No record found for the given ID");
-
-        DataEvidence storage _recordE = recordsEvidence[_id]; //Use "storage" to modify the value directly
-        _recordE.phase = _phase;
-
-        emit statusPhase(_id, _phase); //call event
-
-        return true;
+//--- funtion update state verify evidence
+    function changeStatus(uint256 _id) public{
+        DataEvidence memory _recordE = recordsEvidence[_id];// get record evidence
+        _recordE.verified = !_recordE.verified;//change state
+        recordsEvidence[_id].verified = _recordE.verified; //update state evidence
+        emit statusED(_id, _recordE.verified);//event
     }
 
-    // Get fileHash records for id
-    function getFileHash(uint256 _id) public view returns (string memory) {
-        require(_id < nextId, "No record found for the given ID");
-        return recordsEvidence[_id].fileHash;
+    function getId(uint256 _id) public view onlyOwner returns ( uint256 ) { 
+        return  recordsEvidence[_id].id;
     }
 
-    // Get fileHash records for id
-    function getFilePath(uint256 _id) public view returns (string memory) {
-        require(_id < nextId, "No record found for the given ID");
-        return recordsEvidence[_id].filePath;
-    }
-
-    function getNameContract() public view returns ( string memory) {
-        string memory result = nameContract;
-        return result;
-    }
-
-    function getAdrress() public view onlyOwner returns (address) { 
-        return owner;
-    }
-
-    function getName(uint256 _id) public view returns (string memory) {
-        require(_id < nextId, "No record found for the given ID");
-        return recordsEvidence[_id].names;
-    }
-
-/*
     function getName(uint256 _id) public view returns ( string memory) {
         string memory result = "No existe...";
         for (uint256 i=0; i<arrayEvidence.length;i++){
@@ -132,5 +105,14 @@ contract Prueba2 {
         }     
         return result;
     }
-*/
+
+    function getNameContract() public view returns ( string memory) {
+        string memory result = nameContract;
+        return result;
+    }
+//esta funcion revisar trae los mismos datos que mapping recordevidence
+    function getRecordsEvidence() public view onlyOwner returns (DataEvidence[] memory){
+        return arrayEvidence;
+    }
+
 }

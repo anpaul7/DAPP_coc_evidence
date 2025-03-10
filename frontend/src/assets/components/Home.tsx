@@ -2,7 +2,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useConnect, useReadContract } from 'wagmi';
 import { contractAddress_DE_deploy } from '../../assets/constants';
 import { abi } from '../../assets/abis/coc_evidence_digitalABI';
-import homeImage from '../../assets/images/home1.jpeg';
+import homeImage from '../../assets/images/CustodyBlock.png';
 import { useEffect, useState } from 'react';
 import LoginForm from "../../assets/components/LoginUser"; 
 import { toast } from 'react-toastify';
@@ -86,31 +86,32 @@ function Home({ tokenAuth, setTokenAuth, setUser, setRole}: HomeProps) {
     args: [], //args to pass to the function, args: [address],
   })
 
-  const {data:dataGetName} = useReadContract({ //hub to contract
+  const {data:getAdrress} = useReadContract({ //hub to contract
     address: contractAddress_DE_deploy, //address of the contract deployed
     abi: abi,//abi of the contract
-    functionName: "getName", //function to call on the contract
+    functionName: "getAdrress", //function to call on the contract
     args: [0], //args to pass to the function, args: [address],
   })
 
-  const {data:dataGetRecordsEvidence, isLoading: isLoadingContract,
+  const {data:datagetEvidenciaAll, isLoading: isLoadingContract,
     error: errorContract, isSuccess: isSuccessContract, 
     isRefetching: isRefetchingContract} = useReadContract({ //hub to contract
     address: contractAddress_DE_deploy, //address of the contract deployed
     abi: abi,//abi of the contract
-    functionName: "recordsEvidence", //function to call on the contract
+    functionName: "getEvidenciaAll", //function to call on the contract
     args: [1], //args to pass to the function, args: [address],
   })
 
   //data result console 
+  // refetch(); //funciona con readContract
   useEffect(() => {
-      console.log("dataContract:", dataGetRecordsEvidence); //function result contract
+      console.log("dataContract:", datagetEvidenciaAll); //function result contract
       console.log("isLoadingContract:", isLoadingContract);
       console.log("contractError:", errorContract);
       console.log("isSuccessContract", isSuccessContract);
       console.log("isRefetchingGetName", isRefetchingContract);
       console.log("___________");
-    }, [dataGetRecordsEvidence, isLoadingContract, errorContract,
+    }, [datagetEvidenciaAll, isLoadingContract, errorContract,
       isSuccessContract, isRefetchingContract] 
   );
 //--------------------------------
@@ -137,7 +138,7 @@ return (
         <div className="text-center">
           <h1 className="text-4xl font-bold">Chain-of-Custody Digital Evidence</h1>
           <div className="mt-4">
-            <img src={homeImage} alt="Evidence" className="w-30 h-auto mx-auto rounded-lg shadow-lg" />
+            <img src={homeImage} alt="CustodyBlock" className="w-30 h-auto mx-auto rounded-lg shadow-lg" />
           </div>
           {/* 
           <div className="grid grid-cols-9 items-center justify-center w-full mt-4 gap-x-8">
@@ -191,7 +192,7 @@ return (
             Operations for registration, storing and tracing digital evidence in computer forensic processes.
           </p>
           <div className="mt-4 text-black">
-            Data Records Evidence Contract: {dataGetRecordsEvidence?.toString()}
+            Data Records Evidence Contract: {datagetEvidenciaAll?.toString()}
           </div>
         </div>
       </div>

@@ -1,23 +1,22 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useConnect, useReadContract, useWriteContract } from 'wagmi';
+import { useAccount, useConnect, useReadContract, useWriteContract, usePublicClient } from 'wagmi';
 import { contractAddress_DE_deploy } from '../constants';
 import { abi } from '../abis/coc_evidence_digitalABI';
-import  React,{ useEffect, useRef, useState } from 'react';
+import  React,{ useEffect, useState } from 'react';
 import { waitForTransactionReceipt } from 'wagmi/actions';
 import { config } from '../../main';
 import { toast } from 'react-toastify';
-import { Checkbox, Radio } from "@material-tailwind/react";
+import { ethers } from 'ethers';
 
 import { ChevronDownIcon } from '@heroicons/react/16/solid'
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
-import { FcAudioFile, FcButtingIn, FcDataEncryption, FcDataProtection, FcDataRecovery, FcDocument, FcEditImage, FcFilingCabinet, FcFinePrint, FcFolder, FcImageFile, FcInspection, FcKey, FcManager, FcMultipleDevices, FcNews, FcNook, FcOvertime, FcPlanner, FcReadingEbook, FcReuse, FcSafe, FcSelfie, FcSupport, FcSurvey, FcTodoList, FcWorkflow } from 'react-icons/fc';
+import { CheckCircleIcon } from '@heroicons/react/24/outline';
+import {  FcButtingIn, FcDataProtection, FcDocument, FcFilingCabinet, FcFinePrint, FcFolder, FcInspection, FcKey, FcManager, FcMultipleDevices, FcNook,  FcPlanner, FcReadingEbook, FcReuse, FcSafe,  FcSupport, FcSurvey, FcTodoList } from 'react-icons/fc';
 
 const API = import.meta.env.VITE_API_SERVER_FLASK;//URL server backend
 
 function Identification () {
 
-  const [txHashBlockchain, setTxHashBlockchain] = useState('');// hash of the transaction registered evidence
   //const [evidenceFound, setEvidenceFound] = useState(null);// evidence registered in db
   const [tokenAuth, setTokenAuth] = useState('');//authentication token 
 
@@ -38,13 +37,12 @@ function Identification () {
   const [fileName, setFileName] = useState('');
 
   const [open, setOpen] = useState(false); //dialog register evidence
-  const [open2, setOpen2] = useState(false); //dialog evidence found in db
 
 //----------------------------------------
 //----- revisar posiblemente quitar
   const registerAsk = async (e) => { //use in button on click register evidence
     e.preventDefault(); 
-
+    
     if( !formData2.methodAdquisition || !formData2.noteEvidence){
       toast.error('Please, fill all the fields', { autoClose: 1000 });
       return;  
@@ -59,7 +57,7 @@ function Identification () {
             'Content-Type':'application/json'
             },
           body: JSON.stringify({
-            id: formData2.fileHash,          
+            id: formData2.hashEvidence,          
           })
         });
 
@@ -68,11 +66,9 @@ function Identification () {
         if(!response.ok){
             throw new Error(`HTTP error!: Verify evidence exists in BD: ${response.status}`);
         }
-        if (data.status) {
-          setOpen2(true); // Evidence exists, show dialog no register
-        } else {
+        if (!data.status) {
           setOpen(true);  // Evidence not exists, show dialog register
-        }
+        } 
         //setEvidenceFound(data.status);//true or false evidence exists
         console.log("Response if evidence exists in BD ?: ", data.status);
         console.log(data.status);    
@@ -107,6 +103,7 @@ function Identification () {
 
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('caseNumber', formData2.caseNumber);
 
         try {
           //const response = await fetch('http://localhost:5000/upload', {
@@ -133,21 +130,15 @@ function Identification () {
           const currentDate = new Date().toLocaleString('es-ES', {
             timeZone: 'America/Bogota'
           });
-
           const getMilliseconds = new Date();
           const milliseconds = String(getMilliseconds.getMilliseconds()).padStart(3, '0');
-        
           const selectDate = `${currentDate}.${milliseconds}`;
-
+      
           setFormData(prevState => ({
             ...prevState,        
             filePath: data.file_path,
-            fileHash: data.file_hash,
-            userType: '',
-            id: '',
-            names: '',
-            lastNames: '',
-            datepicker: selectDate
+            hashEvidence: data.file_hash,
+            registrationDate: selectDate,
           }));
 
           console.log('File path:', data.file_path);
@@ -178,12 +169,12 @@ function Identification () {
     evidenceType:'',
 
     userType: '',
-    id: '',
+    userId: '',
     names: '',
     lastNames: '',
     filePath: '',
-    fileHash: '',
-    datepicker: '',
+    hashEvidence: '',
+    registrationDate: '',
 
     methodAdquisition: '',
     noteEvidence: '',
@@ -197,34 +188,27 @@ function Identification () {
     }));
   };
 //----------------------------------------
-  const redirectForm = () => { // redirect to form1 register evidence 
-    toast.error("Redirect to Stage 1");
-    clearForm();
-    setOpen2(false)
-  };
-//----------------------------------------
   const clearForm = () => { // clear box data form to default
     setFormData(prevState => ({
       ...prevState,
+      hashEvidence: '',
       caseNumber:'',
       location:'',
       device:'',
       evidenceType:'',
-    
-      userType: "",
-      id: '',
-      names: '',
-      lastNames: '',
       filePath: '',
-      fileHash: '',
-      datepicker: '',
+      registrationDate: '',
 
       methodAdquisition: '',
-      noteEvidence: ''
+      noteEvidence: '',
+      userId: '',
+      names: '',
+      lastNames: '',
+      userType: "",
+      
     }));
 
     setFile(null);
-    setTxHashBlockchain('');
     setFileName('');
 
     // hide and show forms
@@ -233,8 +217,6 @@ function Identification () {
       setShowSecondForm(false);
       setShowThirdForm(false);
     }, 1000); 
-
-    console.log(formData2);
   };
 
   const handleBack1 = () => {  // clear box data form
@@ -264,8 +246,8 @@ function Identification () {
   const handleNext1 = (e) => {  // clear box data form
     e.preventDefault();
     
-  if( !formData2.fileHash || !formData2.filePath || !formData2.datepicker ||
-      !formData2.id || !formData2.names || !formData2.lastNames || !formData2.userType){
+  if( !formData2.methodAdquisition|| !formData2.noteEvidence|| 
+    !formData2.userId || !formData2.names || !formData2.lastNames || !formData2.userType){
         toast.error('Please, fill all the fields', { autoClose: 1000 });
         return;
   }
@@ -286,60 +268,83 @@ function Identification () {
     e.preventDefault(); // Prevent the default form submission behavior
 
     setRegisterEvidence(true);
-  
     setOpen(false);
 
-    /*
-    setRegisterEvidence(true);
-
     try {
-        txHashBlockchain = await writeContractAsync({
+      const evidenceData = [
+        [0,formData2.hashEvidence, parseInt(formData2.caseNumber),
+          formData2.location, formData2.device, formData2.evidenceType, 
+          formData2.filePath, formData2.registrationDate
+        ], 
+        [formData2.methodAdquisition, formData2.noteEvidence,
+          parseInt(formData2.userId), formData2.names, 
+          formData2.lastNames, formData2.userType
+        ],
+        ["preservation","custody","noStateDate",
+          "noFileTecnical","noFileExecutive"
+        ]
+      ];
+
+        const currentTxHash = await writeContractAsync({
         address: contractAddress_DE_deploy, //address of the contract deployed
         abi,
         functionName: "createEvidence", //function to call on the contract
-        args: [formData2.userType, formData2.idType, parseInt(formData2.id),
-          formData2.names, formData2.lastNames, formData2.fileHash,
-          formData2.filePath, formData2.datepicker], //args to pass to the function, args: [address],
-      });
-        
-      await waitForTransactionReceipt(config, { //report if the transaction was correct
+        args: evidenceData, //args to pass 
+        });
+      
+      if (!currentTxHash || !currentTxHash.startsWith('0x')) {
+        console.error("Invalid transaction hash:", currentTxHash);
+        toast.error("Invalid transaction hash");
+        return;
+      }
+
+      const receiptCurrentTx = await waitForTransactionReceipt(config, { //report if the transaction was correct
         confirmations: 1,
-        hash: txHashBlockchain, //hash of the transaction written
-      })
+        hash: currentTxHash, //hash of the transaction written
+      });
+
+      //----------------------------------------
+      //extract currentId from event transaction receipt
+      //const publicClient = usePublicClient();
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(contractAddress_DE_deploy, abi, provider);
+
+
+      const parsedLogs = receiptCurrentTx.logs.map(log => {
+        try {
+          return contract.interface.parseLog(log);
+        } catch (error) { // If the log cannot be parsed, return null
+          return null;
+        }
+      }).filter(log => log !== null);
+      // event created evidence the smart contract
+      const createdEvent = parsedLogs.find(event => event.name === "createdDataEvidence");
+      let currentId;
+      if (createdEvent) {
+        currentId = createdEvent.args.id;
+        console.log("CurrentId from event obtained: ", currentId);
+      } else {
+        console.log("Event 'createdED' not found in logs.");
+      }
   
+      handleInsertDB(currentTxHash, currentId); 
       setRegisterEvidence(false);
 
-      
       console.log(formData2);
-      
-      setShowFirstForm(true);
-      setShowSecondForm(false);
-
-      //refetch();
-
+      toast.success('Evidence registered successfully!', { autoClose: 3000 }); //notification user register evidence 
+      console.log("Finish: blockchainTxHash evidence registered: ", currentTxHash);
+      clearForm();// clear box data form     
     } catch (error) {
       console.error(error);
       toast.error('Error registering evidence'); //notification user register evidence
       setRegisterEvidence(false);
     }
-      */
-    console.log(formData2);
-
-    handleInsertDB(); 
-
-    toast.success('Evidence registered successfully!'); //notification user register evidence 
-
-    console.log("txHashBlockchain evidence registered: ", txHashBlockchain);
-    clearForm();// clear box data form
-    setFile(null);
-     
     setRegisterEvidence(false);
-    console.log("Finish register evidence in blockchain");
   };
   //---------------------------------
  
   //---- insert data digital evidence to database
-  const handleInsertDB = async () => { 
+  const handleInsertDB = async (_blockchainTxHash: string, _currentId: number) => { 
     try{
 
       const response = await fetch(`${API}/insert`, { //submit data to server
@@ -348,25 +353,31 @@ function Identification () {
             "Authorization": `Bearer ${tokenAuth}`,
             'Content-Type':'application/json'
             },
-          body: JSON.stringify({ //13 fields
+          body: JSON.stringify({ 
+            hashEvidence: formData2.hashEvidence,
+            currentId: _currentId,
             caseNumber: formData2.caseNumber,
             location: formData2.location,
             divice: formData2.device,
             evidenceType: formData2.evidenceType,
-            fileHash: formData2.fileHash,
+            
             filePath: formData2.filePath,
-            datepicker: formData2.datepicker,
+            registrationDate: formData2.registrationDate,
             
             methodAdquisition: formData2.methodAdquisition,
             noteEvidence: formData2.noteEvidence,
-
-            id: formData2.id,
+            userId: formData2.userId,
             names: formData2.names,
             lastNames: formData2.lastNames,
             userType: formData2.userType,
+
+            phase: 'preservation',
+            state: 'custody',
+            stateUpdateDate: 'noStateDate',
+            technicalReport: 'noFile',
+            executiveReport: 'noFile',
             
-            phase: 'Preservation',
-            txHashBlockchain: txHashBlockchain //hash of the transaction registered evidence in blockchain         
+            blockchainTxHash: _blockchainTxHash //hash of the transaction registered evidence in blockchain         
           })
         });
 
@@ -375,11 +386,8 @@ function Identification () {
         if(!response.ok){
             throw new Error(`HTTP error! Status Register Evidence BD: ${response.status}`);
         }
-
-        console.log("report data registered");
-        console.log(data);
+        console.log("Success report data registered",data);
       
-        console.log('Success:',data);         
     }catch(error){
         console.error('Error:',error);
     }
@@ -461,7 +469,7 @@ return (
     <div className="w-[80%] flex flex-col justify-start items-center bg-[#010f1f] text-white p-1 mt-20">
        
         {showFirstForm && (
-        <form className="w-[60%] bg-gray-50 rounded-7 p-5 pb-10" id="form0">    
+        <form className="w-[60%] bg-gray-50 rounded-7 px-8 p-5 pb-10" id="form0">    
               
               <div className="form-group border-b border-gray-300 pb-7">
                 <h2 className="text-center text-2xl font-semibold text-lg text-gray-700">
@@ -472,7 +480,7 @@ return (
                     <label htmlFor="caseNumber" className="text-2xl font-semibold text-lg text-gray-700">
                       Case record number:
                     </label>
-                    <div className="mt-2">
+                    <div className="mt-2 max-w-[95%]">
                       <input 
                         id="caseNumber"
                         name="caseNumber"
@@ -496,7 +504,7 @@ return (
                   <label htmlFor="location" className="text-2xl font-semibold text-lg text-gray-700">
                     Location where evidence was found
                   </label>
-                  <div className="mt-2">
+                  <div className="mt-2 max-w-[98%]">
                     <input
                       id="location"
                       name="location"
@@ -517,7 +525,7 @@ return (
                       Evidence was extracted from:
                     </label>
                     
-                    <div className="mt-2 flex justify-center space-x-6">
+                    <div className="mt-2 flex justify-center space-x-6 max-w-[95%]">
                         {[
                           { value: "Computer", label: "Computer" },
                           { value: "Laptop", label: "Laptop" },
@@ -554,7 +562,7 @@ return (
                     <label htmlFor="evidenceType" className="text-2xl font-semibold text-lg text-gray-700">
                       Type of evidence
                     </label>
-                    <div className="mt-2 flex justify-center space-x-6">
+                    <div className="mt-2 flex justify-center space-x-6 max-w-[95%]">
                         {[
                           { value: ".docx", label: ".docx" },
                           { value: ".xlsx", label: ".xlsx" },
@@ -590,7 +598,7 @@ return (
               <label htmlFor="fileType" className="text-2xl font-semibold text-lg text-gray-700">
                 Select file
               </label>
-              <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-300 px-6 py-3">
+              <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-300 px-6 py-3 ">
                 <div className="text-center">
                   {fileName ? (
                       <span className="text-lg text-gray-700">{fileName}</span>  // Show the selected file name
@@ -632,7 +640,7 @@ return (
         )}
 
         {showSecondForm && (
-          <form className="w-[60%] bg-gray-50 rounded-7 p-5 pb-10" id="form1">    
+          <form className="w-[60%] bg-gray-50 rounded-7 px-8 p-5 pb-10" id="form1">    
 
             <div className="form-group border-b border-gray-300 pb-7">
                 <h2 className="text-center text-2xl font-semibold text-lg text-gray-700">
@@ -643,7 +651,7 @@ return (
                 <label htmlFor="methodAdquisition" className="text-base/7 font-semibold text-gray-900 ">
                   Methods and instruments used in the acquisition:
                 </label>
-                <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900">
+                <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900 max-w-[98%]">
                   <FcSupport className="size-7"/>
                   <input
                     id="methodAdquisition"
@@ -660,17 +668,17 @@ return (
               
               <div className="form-group border-b border-gray-300 pb-4">
                 <label htmlFor="noteEvidence" className="text-base/7 font-semibold text-gray-900 ">
-                  Annotations on the acquisition of digital evidence:
+                  Annotation on the acquisition of digital evidence:
                 </label>
-                <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900">
+                <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900 max-w-[98%]">
                   <FcSurvey className="size-8"/>
-                  <textarea
+                  <input
                     id="noteEvidence"
                     name="noteEvidence"
+                    type="text"
                     value={formData2.noteEvidence}
                     onChange={handleChange}
                     autoComplete="noteEvidence"
-                    rows={3} // number of rows
                     className="block w-full rounded-md bg-white-100 px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-base/6 resize-none"
                     required
                   />
@@ -683,23 +691,23 @@ return (
             </div>
 
               <div className="form-group border-b border-gray-300 pb-4">
-                <label htmlFor="id" className="text-base/7 font-semibold text-gray-900 ">
+                <label htmlFor="userId" className="text-base/7 font-semibold text-gray-900 ">
                   Identification:
                 </label>
-                <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900">
+                <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900 max-w-[95%]">
                   <FcManager className="size-9" />
                   <input     
-                    id="id"
-                    name="id"
+                    id="userId"
+                    name="userId"
                     type="number"
-                    value={formData2.id}
+                    value={formData2.userId}
                     onChange={(e) => {
                       const value = e.target.value.replace(/^0+/, ''); // Elimina ceros a la izquierda
                       if (/^\d*$/.test(value)) { // Solo permite números
-                        handleChange({ target: { name: "id", value } });
+                        handleChange({ target: { name: "userId", value } });
                       }
                     }}
-                    autoComplete="id"
+                    autoComplete="userId"
                     className="block w-[40%] rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-base/6"
                     placeholder="Enter your ID"
                     autoFocus
@@ -713,7 +721,7 @@ return (
                   <label htmlFor="names" className="text-base/7 font-semibold text-gray-900 ">
                     Names:
                   </label>
-                  <div className="mt-2">
+                  <div className="mt-2 max-w-[95%]">
                     <input
                       id="names"
                       name="names"
@@ -733,7 +741,7 @@ return (
                   <label htmlFor="lastNames" className="text-base/7 font-semibold text-gray-900 ">
                     Last names:
                   </label>
-                  <div className="mt-2">
+                  <div className="mt-2 max-w-[95%]">
                     <input
                       id="lastNames"
                       name="lastNames"
@@ -754,7 +762,7 @@ return (
                 <label htmlFor="userType" className="text-base/7 font-semibold text-gray-900 ">
                   User type:
                 </label>
-                <div className="relative w-[50%] mt-2">
+                <div className="relative max-w-[46%] mt-2">
                   <select
                     id="userType"
                     name="userType"
@@ -781,9 +789,6 @@ return (
                   />
                 </div>
               </div>
-           
-
-
 
             <div className="mt-6 flex items-center justify-center gap-x-6">
                 <button 
@@ -808,7 +813,7 @@ return (
 {/*----------------------------------------*/}
         {showThirdForm && (
 
-          <form className="w-[60%] bg-gray-50 rounded-7 p-6 pb-3" id="form2">
+          <form className="w-[60%] bg-gray-50 rounded-7 px-8 p-6 pb-3" id="form2">
               <div className="form-group border-b border-gray-300 pb-4">
                 <h2 className="text-center text-2xl font-semibold text-lg text-gray-700">
                   Step 4 - Summary information for registration in the blockchain</h2>   
@@ -816,10 +821,10 @@ return (
               <div className="col-span-full"> 
                   
                 <div className="form-group border-b border-gray-300 pb-4">
-                  <label htmlFor="datepicker" className="text-base/7 font-semibold text-gray-900 ">
+                  <label htmlFor="caseNumber" className="text-base/7 font-semibold text-gray-900 ">
                      Case number investigation:
                   </label>
-                  <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900">
+                  <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900 max-w-[95%]">
                   <FcTodoList className="size-8" />
                     <input
                       type="text"
@@ -839,7 +844,7 @@ return (
                     <label htmlFor="file-path" className="text-base/7 font-semibold text-gray-900 ">
                       Name and path of storage of digital evidence:
                     </label>
-                    <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900">
+                    <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900 max-w-[95%]">
                       <FcFilingCabinet className="size-8"/>
                       <input
                         id="filePath"
@@ -859,7 +864,7 @@ return (
                 <label htmlFor="evidence2" className="text-base/7 font-semibold text-gray-900 ">
                   Device where digital evidence was extracted:
                 </label>
-                <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900">
+                <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900 max-w-[95%]">
                   <FcMultipleDevices className="size-8"/>
                   <input
                     type="text"
@@ -871,17 +876,17 @@ return (
                 </div>
               </div> 
               <div className="form-group border-b border-gray-300 pb-4">
-                <label htmlFor="fileHash" className="text-base/7 font-semibold text-gray-900 ">
+                <label htmlFor="hashEvidence" className="text-base/7 font-semibold text-gray-900 ">
                   Hash code generated from digital evidence:
                 </label>
-                <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900">
+                <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900 max-w-[95%]">
                   <FcKey className="size-8"/>
                   <textarea
-                    id="fileHash"
-                    name="fileHash"
-                    value={formData2.fileHash}
+                    id="hashEvidence"
+                    name="hashEvidence"
+                    value={formData2.hashEvidence}
                     onChange={handleChange}
-                    autoComplete="fileHash"
+                    autoComplete="hashEvidence"
                     readOnly
                     rows={2} // number of rows
                     className="block w-full rounded-md bg-white-100 px-3 py-1.5 text-base text-red-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-base/6 resize-none"
@@ -892,16 +897,16 @@ return (
 
               </div>
               <div className="form-group border-b border-gray-300 pb-4">
-                  <label htmlFor="datepicker" className="text-base/7 font-semibold text-gray-900 ">
+                  <label htmlFor="registrationDate" className="text-base/7 font-semibold text-gray-900 ">
                      Date of acquisition:
                   </label>
-                  <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900">
+                  <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900 max-w-[95%]">
                   <FcPlanner className="size-8" />
                     <input
-                      id="datepicker"
-                      name="datepicker"
+                      id="registrationDate"
+                      name="registrationDate"
                       type="text"
-                      value={formData2.datepicker}
+                      value={formData2.registrationDate}
                       onChange={handleChange}
                       autoComplete="family-name"
                       className="block w-[50%] rounded-md bg-white-100 px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-blue-700 sm:text-base/6 resize-none"
@@ -916,7 +921,7 @@ return (
                 <label htmlFor="evidence1" className="text-base/7 font-semibold text-gray-900 ">
                   Responsible for obtaining digital evidence:
                 </label>
-                <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900">
+                <div className="mt-2 flex items-center gap-2 text-base font-medium text-gray-900 max-w-[95%]">
                   <FcButtingIn className="size-8"/>
                   <input
                     type="text"

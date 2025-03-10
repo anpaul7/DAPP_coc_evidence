@@ -93,11 +93,17 @@ def upload_file():
             return jsonify({"Error": "No file sent"}), 400
 
         file = request.files['file']
-        
         if file.filename == '':
             return jsonify({"Error": "No selected file"}), 401
         
-        replace_filename = replace_whitespace(file.filename)
+        case_number = request.form.get('caseNumber')
+        if not case_number:
+            return jsonify({"Error": "No caseNumber provided"}), 401
+
+        case_number_str = str(case_number).strip()
+        _, ext = os.path.splitext(file.filename) # Get the file extension
+        new_filename = f"case_number_{case_number_str}_digital_evidence{ext}" # Generate a new filename
+        new_filename = replace_whitespace(new_filename)
 
         # Generate the hash
         file_hash = generate_file_hash(file)
@@ -112,7 +118,7 @@ def upload_file():
             return jsonify({"Error": "Evidence already exists in database"}), 402
         else:
             # Get the original filename
-            original_filepath = os.path.join(app.config['UPLOAD_FOLDER'], replace_filename)
+            original_filepath = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
 
             # Generate a unique filename
             unique_filepath = get_unique_filename(original_filepath)
@@ -175,34 +181,50 @@ def registerEvidence():
     data = request.get_json() #get data from json
 
     # Verify if the 'hash' field is present
-    if not data.get('fileHash'):
-        return jsonify({"error": "The 'fileHash' field isn't present"}), 400
+    if not data.get('hashEvidence'):
+        return jsonify({"error": "The 'hashEvidence' field isn't present"}), 400
 
-    # Verify if the 'fileHash' already exists in the database
-    existing_user = collection.find_one({"_id": data['fileHash']})
+    # Verify if the 'hashEvidence' already exists in the database
+    existing_user = collection.find_one({"_id": data['hashEvidence']})
     if existing_user:
-        return jsonify({"error": "The 'fileHash' already exists"}), 400
+        return jsonify({"error": "The 'hashEvidence' already exists"}), 400
 
     evidence_data = {
-        '_id': data.get('fileHash'), # Get the 'id' field as the primary key
-        'userType': data.get('userType'),
-        'idType': data.get('idType'),
-        'id': data.get('id'),
+        '_id': data.get('hashEvidence'), # Get the 'id' field as the primary key
+        'currentId': data.get('currentId'),
+        'caseNumber': data.get('caseNumber'),
+        'location': data.get('location'),
+        'device': data.get('device'),
+        'evidenceType': data.get('evidenceType'),
+        'filePath': data.get('filePath'),
+        'methodAdquisition': data.get('methodAdquisition'),
+        'noteEvidence': data.get('noteEvidence'),
+        
+        'userId': data.get('userId'),
         'names': data.get('names'),
         'lastNames': data.get('lastNames'),
-        'filePath': data.get('filePath'),
-        'datepicker': data.get('datepicker'),
-        'txHash': data.get('txHash'), # get tx registration evidence
-        'phase': data.get('phase'),
-        'uploadReport': 'Unregistered',
-        'reportPath': ''
+        'userType': data.get('userType'),
+         
+        'technicalReport': 'noFile',
+        'executiveReport': 'noFile',
+
+        'transactions': [
+            {   
+                '_id': 0,
+                'blockchainTxHash': data.get('blockchainTxHash'),
+                'phase': 'preservation',
+                'state': 'custody',
+                #'stateUpdateDate': 'noStateDate',
+                'registrationDate': data.get('registrationDate'), 
+            }
+        ]
     }
 
     #data = {"id":123, "name":"pepito", "password":"123456"}
     print(f"Show data evidence: {evidence_data}")
     result = collection.insert_one(evidence_data)
     response_data = {
-        'msg': 'registered data evidence successfully',
+        'msg': 'Successfully recorded digital evidence',
         'inserted_id': str(result.inserted_id)
     }
     return jsonify(response_data),201
