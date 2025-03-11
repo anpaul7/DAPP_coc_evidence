@@ -15,12 +15,6 @@ export const abi = [
       },
       {
         "indexed": false,
-        "internalType": "string",
-        "name": "hashEvidence",
-        "type": "string"
-      },
-      {
-        "indexed": false,
         "internalType": "uint256",
         "name": "caseNumber",
         "type": "uint256"
@@ -47,6 +41,12 @@ export const abi = [
         "indexed": false,
         "internalType": "string",
         "name": "filePath",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "hashEvidence",
         "type": "string"
       },
       {
@@ -230,11 +230,6 @@ export const abi = [
             "type": "uint256"
           },
           {
-            "internalType": "string",
-            "name": "hashEvidence",
-            "type": "string"
-          },
-          {
             "internalType": "uint256",
             "name": "caseNumber",
             "type": "uint256"
@@ -257,6 +252,11 @@ export const abi = [
           {
             "internalType": "string",
             "name": "filePath",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "hashEvidence",
             "type": "string"
           },
           {
@@ -352,11 +352,6 @@ export const abi = [
             "type": "uint256"
           },
           {
-            "internalType": "string",
-            "name": "hashEvidence",
-            "type": "string"
-          },
-          {
             "internalType": "uint256",
             "name": "caseNumber",
             "type": "uint256"
@@ -379,6 +374,11 @@ export const abi = [
           {
             "internalType": "string",
             "name": "filePath",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "hashEvidence",
             "type": "string"
           },
           {
@@ -518,11 +518,6 @@ export const abi = [
                 "type": "uint256"
               },
               {
-                "internalType": "string",
-                "name": "hashEvidence",
-                "type": "string"
-              },
-              {
                 "internalType": "uint256",
                 "name": "caseNumber",
                 "type": "uint256"
@@ -545,6 +540,11 @@ export const abi = [
               {
                 "internalType": "string",
                 "name": "filePath",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "hashEvidence",
                 "type": "string"
               },
               {
@@ -812,11 +812,6 @@ export const abi = [
             "type": "uint256"
           },
           {
-            "internalType": "string",
-            "name": "hashEvidence",
-            "type": "string"
-          },
-          {
             "internalType": "uint256",
             "name": "caseNumber",
             "type": "uint256"
@@ -839,6 +834,11 @@ export const abi = [
           {
             "internalType": "string",
             "name": "filePath",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "hashEvidence",
             "type": "string"
           },
           {

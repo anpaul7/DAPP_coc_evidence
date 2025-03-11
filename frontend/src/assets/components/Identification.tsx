@@ -39,7 +39,7 @@ function Identification () {
   const [open, setOpen] = useState(false); //dialog register evidence
 
 //----------------------------------------
-//----- revisar posiblemente quitar
+//----- validation evidence exists in BD
   const registerAsk = async (e) => { //use in button on click register evidence
     e.preventDefault(); 
     
@@ -57,7 +57,8 @@ function Identification () {
             'Content-Type':'application/json'
             },
           body: JSON.stringify({
-            id: formData2.hashEvidence,          
+            caseNumber: parseInt(formData2.caseNumber),
+            hashEvidence: formData2.hashEvidence,          
           })
         });
 
@@ -271,10 +272,11 @@ function Identification () {
     setOpen(false);
 
     try {
+
       const evidenceData = [
-        [0,formData2.hashEvidence, parseInt(formData2.caseNumber),
-          formData2.location, formData2.device, formData2.evidenceType, 
-          formData2.filePath, formData2.registrationDate
+        [0, parseInt(formData2.caseNumber), formData2.location, 
+          formData2.device, formData2.evidenceType, formData2.filePath, 
+          formData2.hashEvidence,formData2.registrationDate
         ], 
         [formData2.methodAdquisition, formData2.noteEvidence,
           parseInt(formData2.userId), formData2.names, 
@@ -305,10 +307,8 @@ function Identification () {
 
       //----------------------------------------
       //extract currentId from event transaction receipt
-      //const publicClient = usePublicClient();
       const provider = new ethers.BrowserProvider(window.ethereum);
       const contract = new ethers.Contract(contractAddress_DE_deploy, abi, provider);
-
 
       const parsedLogs = receiptCurrentTx.logs.map(log => {
         try {
@@ -319,14 +319,16 @@ function Identification () {
       }).filter(log => log !== null);
       // event created evidence the smart contract
       const createdEvent = parsedLogs.find(event => event.name === "createdDataEvidence");
-      let currentId;
+      let currentId = -1;
       if (createdEvent) {
-        currentId = createdEvent.args.id;
+        currentId =  parseInt(createdEvent.args.id);
         console.log("CurrentId from event obtained: ", currentId);
       } else {
-        console.log("Event 'createdED' not found in logs.");
+        console.log("Event 'createdED' not found in logs.",currentId);
       }
-  
+
+      //const currentTxHash ="0x0";
+      //const currentId = 100;
       handleInsertDB(currentTxHash, currentId); 
       setRegisterEvidence(false);
 
@@ -346,27 +348,25 @@ function Identification () {
   //---- insert data digital evidence to database
   const handleInsertDB = async (_blockchainTxHash: string, _currentId: number) => { 
     try{
-
       const response = await fetch(`${API}/insert`, { //submit data to server
           method: 'POST',
           headers: {
             "Authorization": `Bearer ${tokenAuth}`,
             'Content-Type':'application/json'
             },
-          body: JSON.stringify({ 
-            hashEvidence: formData2.hashEvidence,
+          body: JSON.stringify({            
             currentId: _currentId,
-            caseNumber: formData2.caseNumber,
+            caseNumber: parseInt(formData2.caseNumber),
             location: formData2.location,
-            divice: formData2.device,
-            evidenceType: formData2.evidenceType,
-            
+            device: formData2.device,
+            evidenceType: formData2.evidenceType,        
             filePath: formData2.filePath,
+            hashEvidence: formData2.hashEvidence,
             registrationDate: formData2.registrationDate,
             
             methodAdquisition: formData2.methodAdquisition,
             noteEvidence: formData2.noteEvidence,
-            userId: formData2.userId,
+            userId: parseInt(formData2.userId),
             names: formData2.names,
             lastNames: formData2.lastNames,
             userType: formData2.userType,

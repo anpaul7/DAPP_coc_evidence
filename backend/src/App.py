@@ -184,22 +184,26 @@ def registerEvidence():
     if not data.get('hashEvidence'):
         return jsonify({"error": "The 'hashEvidence' field isn't present"}), 400
 
+    if not data.get('caseNumber'):
+        return jsonify({"error": "The 'caseNumber' field isn't present"}), 400
+
     # Verify if the 'hashEvidence' already exists in the database
-    existing_user = collection.find_one({"_id": data['hashEvidence']})
-    if existing_user:
+    existing_data = collection.find_one({ "caseNumber": data['caseNumber'],"hashEvidence": data['hashEvidence']})
+    if existing_data:
         return jsonify({"error": "The 'hashEvidence' already exists"}), 400
 
-    evidence_data = {
-        '_id': data.get('hashEvidence'), # Get the 'id' field as the primary key
-        'currentId': data.get('currentId'),
+    evidence_data = {  
+        '_id': data.get('currentId'),# Get the 'id' field as the primary key
         'caseNumber': data.get('caseNumber'),
         'location': data.get('location'),
         'device': data.get('device'),
         'evidenceType': data.get('evidenceType'),
+        'hashEvidence': data.get('hashEvidence'),
         'filePath': data.get('filePath'),
         'methodAdquisition': data.get('methodAdquisition'),
         'noteEvidence': data.get('noteEvidence'),
-        
+        'registrationDate': data.get('registrationDate'), 
+
         'userId': data.get('userId'),
         'names': data.get('names'),
         'lastNames': data.get('lastNames'),
@@ -210,12 +214,11 @@ def registerEvidence():
 
         'transactions': [
             {   
-                '_id': 0,
+                'txId': 0,
                 'blockchainTxHash': data.get('blockchainTxHash'),
                 'phase': 'preservation',
                 'state': 'custody',
-                #'stateUpdateDate': 'noStateDate',
-                'registrationDate': data.get('registrationDate'), 
+                'txDate': data.get('registrationDate'), 
             }
         ]
     }
@@ -237,7 +240,8 @@ def verifyEvidence():
     data = request.get_json() #get data from json
 
     # Verify if the '_id' already exists in the database
-    existing_evidence = collection.find_one({"_id": data['id']})
+    existing_evidence = collection.find_one({ "caseNumber": data['caseNumber'],"hashEvidence": data['hashEvidence']})
+    
     response_data = {
         'msg': 'Evidence found in database' if existing_evidence else 'Evidence not found in database',
         'status': bool(existing_evidence)  # Return True if the evidence exists, False otherwise

@@ -3,12 +3,12 @@ pragma solidity >=0.8.24;
 
  struct DataEvidence{
     uint256 id;
-    string hashEvidence;
     uint256 caseNumber;
     string location;
     string device;
     string evidenceType;
     string filePath;
+    string hashEvidence;
     string registrationDate;
 }
 
@@ -47,9 +47,9 @@ contract Prueba3 {
 
     // add evidence records
     event createdDataEvidence(
-        uint256 indexed id, string hashEvidence, uint256 caseNumber, string location,
-        string device, string evidenceType, string filePath, string registrationDate,
-        string methodAdquisition, string noteEvidence
+        uint256 indexed id, uint256 caseNumber, string location, string device,
+        string evidenceType, string filePath, string hashEvidence, 
+        string registrationDate, string methodAdquisition, string noteEvidence
     );
      event createdDetailsEvidence(
         uint256 indexed id, uint256 userId, string names,
@@ -114,10 +114,10 @@ contract Prueba3 {
             arrayEvidence.push(evidence);           
 
             emit createdDataEvidence(  //-- call event
-                currentId, _dataEvidence.hashEvidence, 
-                _dataEvidence.caseNumber, _dataEvidence.location,
-                _dataEvidence.device, _dataEvidence.evidenceType,
-                _dataEvidence.filePath, _dataEvidence.registrationDate,
+                currentId, _dataEvidence.caseNumber, 
+                _dataEvidence.location, _dataEvidence.device, 
+                _dataEvidence.evidenceType, _dataEvidence.filePath,
+                _dataEvidence.hashEvidence, _dataEvidence.registrationDate,
                 _detailsEvidence.methodAdquisition, _detailsEvidence.noteEvidence
             );
             emit createdDetailsEvidence(  //-- call event
@@ -127,7 +127,7 @@ contract Prueba3 {
                 _phaseEvidence.stateUpdateDate, _phaseEvidence.technicalReport,
                 _phaseEvidence.executiveReport
             );
-                        registerId++;
+            registerId++;
 
         return true; //if record evidence is correct returns true
     }
