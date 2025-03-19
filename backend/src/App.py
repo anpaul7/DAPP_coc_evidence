@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import Flask, request, jsonify
 import os
 from flask_cors import CORS
@@ -24,6 +25,7 @@ collection2 = db[os.getenv('COLLECTION_NAME2')]
 #--- config JWT
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY') # key secret for token with JWT
 jwt = JWTManager(app)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=40) # time to expire token
 #---------------------------------------------------
 
 #-- Config the upload folder
@@ -99,41 +101,47 @@ def upload_file():
         case_number = request.form.get('caseNumber')
         if not case_number:
             return jsonify({"Error": "No caseNumber provided"}), 401
-
-        case_number_str = str(case_number).strip()
-        _, ext = os.path.splitext(file.filename) # Get the file extension
-        new_filename = f"case_number_{case_number_str}_digital_evidence{ext}" # Generate a new filename
-        new_filename = replace_whitespace(new_filename)
+        try:
+            case_number = int(case_number)
+        except ValueError:
+            return jsonify({"Error": "Invalid caseNumber format"}), 400
 
         # Generate the hash
         file_hash = generate_file_hash(file)
+
         # Reset the file cursor to the beginning
         file.seek(0)
 
-        print(f"Verify hash existing:  {file_hash} - ok")
-        # Check if the hash exists
-        existing_hash = db.digitalevidence.find_one({'_id':file_hash})
+        # Verify if the hash already exists in the database
+        existing_hash = db.digitalevidence.find_one({
+            'caseNumber':case_number, 
+            'hashEvidence':file_hash
+        })
 
         if existing_hash:
-            return jsonify({"Error": "Evidence already exists in database"}), 402
-        else:
-            # Get the original filename
-            original_filepath = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+            return jsonify({"Error": "Evidence already exists in database for this case"}), 402
+        
+        _, ext = os.path.splitext(file.filename) # Get the file extension
+        new_filename = f"case_number_{case_number}_digital_evidence{ext}" # Generate a new filename
+        new_filename = replace_whitespace(new_filename)
 
-            # Generate a unique filename
-            unique_filepath = get_unique_filename(original_filepath)
-            
-            # Save the file in 'uploads'
-            file.save(unique_filepath)
+        # Get the original filename
+        original_filepath = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
 
-            # Print the uploaded file details
-            print(f"Digital evidence file uploaded: {unique_filepath}")
-            print(f"Generated digital evidence hash: {file_hash}")
+        # Generate a unique filename
+        unique_filepath = get_unique_filename(original_filepath)
+        
+        # Save the file in 'uploads'
+        file.save(unique_filepath)
 
-            return jsonify({"message": " Digital evidence uploaded and hash generated successfully", 
-                            "file_path": unique_filepath,
-                            "file_hash": file_hash
-                }), 201
+        # Print the uploaded file details
+        print(f"Digital evidence file uploaded: {unique_filepath}")
+        print(f"Generated digital evidence hash: {file_hash}")
+
+        return jsonify({"message": " Digital evidence uploaded and hash generated successfully", 
+                        "file_path": unique_filepath,
+                        "file_hash": file_hash
+            }), 201
     except Exception as e:
         print(f"Error in upload_file: {str(e)}")
         return jsonify({"Error": "Internal Server Error", "Details": str(e)}), 500
@@ -188,7 +196,7 @@ def registerEvidence():
         return jsonify({"error": "The 'caseNumber' field isn't present"}), 400
 
     # Verify if the 'hashEvidence' already exists in the database
-    existing_data = collection.find_one({ "caseNumber": data['caseNumber'],"hashEvidence": data['hashEvidence']})
+    existing_data = collection.find_one({ "caseNumber": int(data['caseNumber']),"hashEvidence": data['hashEvidence']})
     if existing_data:
         return jsonify({"error": "The 'hashEvidence' already exists"}), 400
 
@@ -202,7 +210,6 @@ def registerEvidence():
         'filePath': data.get('filePath'),
         'methodAdquisition': data.get('methodAdquisition'),
         'noteEvidence': data.get('noteEvidence'),
-        'registrationDate': data.get('registrationDate'), 
 
         'userId': data.get('userId'),
         'names': data.get('names'),
@@ -262,6 +269,11 @@ def verifyHash():
         'status': bool(existing_evidence)  # Return True if the evidence exists, False otherwise
     }
 
+@app.route('/getEvidenceData', methods=['GET'])
+@jwt_required()  
+def get_all_evidences():
+    evidences = list(collection.find({}))
+    return jsonify(evidences), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

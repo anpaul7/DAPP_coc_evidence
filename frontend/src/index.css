@@ -7,6 +7,12 @@
 
 }
 
+::-webkit-scrollbar {
+  width: 12px; /* Scrollbar width */
+  height: 12px;
+}
+
+
 /*
 
 background-color: #e2e2e2;

@@ -33,7 +33,7 @@ function Identification () {
   const [showLeftSectionTwo, setShowLeftSectionTwo] = useState(false);
   const [showLeftSectionThree, setShowLeftSectionThree] = useState(false);
 //----------------------------------------
-  const [file, setFile] = useState(null); // state file
+  const [file, setFile] = useState<File | null>(null); // state file
   const [fileName, setFileName] = useState('');
 
   const [open, setOpen] = useState(false); //dialog register evidence
@@ -101,64 +101,78 @@ function Identification () {
       toast.error('Please, fill all the fields', { autoClose: 1000 });
       return
     }
+    //validate file extension
+    const nameParts = file.name.split('.');
+    const ext = nameParts.pop();
+    if (!ext) {
+      toast.error('The file does not have an extension', { autoClose: 1500 });
+      return;
+    }
+    const fileExtension = `.${ext.toLowerCase()}`;
+    const extensionE = formData2.evidenceType.toLowerCase();
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('caseNumber', formData2.caseNumber);
+    if (fileExtension !== extensionE) {
+      toast.error(`Incorrect selection of the file extension type.`, { autoClose: 1500 });
+      return;
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('caseNumber', formData2.caseNumber);
+    console.log('Case number:', formData2.caseNumber);
 
-        try {
-          //const response = await fetch('http://localhost:5000/upload', {
-          const response = await fetch(`${API}/upload`,{
-            method: 'POST',
-            headers: {
-              "Authorization": `Bearer ${tokenAuth}`
-              },
-            body: formData,
-          });
-          
-          const data = await response.json();
-
-          if (response.status === 402) {//if evidence exists in database
-            toast.error('Error: Evidence already exists in database', { autoClose: 2000 }); 
-            console.error('Error uploading file:', data.error);
-            return;
-          }else if(!response.ok){
-            console.error('Error uploading file:', data.error);
-            toast.error('Error uploading file', { autoClose: 2000 });
-            return;
-          }
-
-          const currentDate = new Date().toLocaleString('es-ES', {
-            timeZone: 'America/Bogota'
-          });
-          const getMilliseconds = new Date();
-          const milliseconds = String(getMilliseconds.getMilliseconds()).padStart(3, '0');
-          const selectDate = `${currentDate}.${milliseconds}`;
+    try {
+      //const response = await fetch('http://localhost:5000/upload', {
+      const response = await fetch(`${API}/upload`,{
+        method: 'POST',
+        headers: {
+          "Authorization": `Bearer ${tokenAuth}`
+          },
+        body: formData,
+      });
       
-          setFormData(prevState => ({
-            ...prevState,        
-            filePath: data.file_path,
-            hashEvidence: data.file_hash,
-            registrationDate: selectDate,
-          }));
+      const data = await response.json();
 
-          console.log('File path:', data.file_path);
-          console.log('File hash:', data.file_hash);
-          toast.success('File uploaded successfully', { autoClose: 1000 });
-          setShowLeftSection(false);
-          setShowLeftSectionTwo(true);
-          setShowLeftSectionThree(false);
+      if (response.status === 402) {//if evidence exists in database
+        toast.error('Error: Digital evidence already exists in the blockchain', { autoClose: 2000 }); 
+        console.error('Error uploading file:', data.error);
+        return;
+      }else if(!response.ok){
+        console.error('Error uploading file:', data.error);
+        toast.error('Error uploading file', { autoClose: 2000 });
+        return;
+      }
 
-          setTimeout(() => {
-            setShowFirstForm(false);  // Hide the first form
-            setShowSecondForm(true);  // Show the second form
-            setShowThirdForm(false);
-          }, 1000); // 4 seconds 
+      const currentDate = new Date().toLocaleString('es-ES', {
+        timeZone: 'America/Bogota'
+      });
+      const getMilliseconds = new Date();
+      const milliseconds = String(getMilliseconds.getMilliseconds()).padStart(3, '0');
+      const selectDate = `${currentDate}.${milliseconds}`;
+  
+      setFormData(prevState => ({
+        ...prevState,        
+        filePath: data.file_path,
+        hashEvidence: data.file_hash,
+        registrationDate: selectDate,
+      }));
 
-        } catch (error) {
-          console.error('Error requesting file upload:', error);
-          toast.error('Error requesting file upload');
-        }
+      console.log('File path:', data.file_path);
+      console.log('File hash:', data.file_hash);
+      toast.success('File uploaded successfully', { autoClose: 1000 });
+      setShowLeftSection(false);
+      setShowLeftSectionTwo(true);
+      setShowLeftSectionThree(false);
+
+      setTimeout(() => {
+        setShowFirstForm(false);  // Hide the first form
+        setShowSecondForm(true);  // Show the second form
+        setShowThirdForm(false);
+      }, 1000); // 4 seconds 
+
+    } catch (error) {
+      console.error('Error requesting file upload:', error);
+      toast.error('Error requesting file upload');
+    }
   
   };
 
@@ -273,6 +287,7 @@ function Identification () {
 
     try {
 
+      /*
       const evidenceData = [
         [0, parseInt(formData2.caseNumber), formData2.location, 
           formData2.device, formData2.evidenceType, formData2.filePath, 
@@ -327,8 +342,9 @@ function Identification () {
         console.log("Event 'createdED' not found in logs.",currentId);
       }
 
-      //const currentTxHash ="0x0";
-      //const currentId = 100;
+      */
+      const currentTxHash ="0x0";
+      const currentId = 100;
       handleInsertDB(currentTxHash, currentId); 
       setRegisterEvidence(false);
 

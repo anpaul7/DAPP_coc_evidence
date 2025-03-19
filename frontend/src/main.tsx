@@ -12,7 +12,6 @@ import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from 'react-toastify';
 
-
 export const config: ReturnType<typeof getDefaultConfig> = getDefaultConfig({
   appName: 'Chain-of-Custody Digital Evidence',
   projectId: import.meta.env.VITE_PROJECT_ID,

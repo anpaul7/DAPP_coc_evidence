@@ -4,6 +4,8 @@ import { Bars3Icon,  XMarkIcon } from '@heroicons/react/24/outline'
 import { useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { FcBusinessman } from "react-icons/fc";
+import { jwtDecode, JwtPayload } from 'jwt-decode';
+import { useDisconnect } from 'wagmi';
 
 const navigation = [
   { name: 'Home', href: '/', current: true, roles: ['administrator', 'forense', 'lawyer','judge','user' ] },
@@ -26,24 +28,56 @@ interface NavbarProps {
   setRole: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-export  function Navbar({ tokenAuth, setTokenAuth, user, setUser, role, setRole }: NavbarProps) {
-  
-  console.log("Navbar setTokenAuth:", setTokenAuth);
+export  function Navbar({ 
+  tokenAuth, setTokenAuth, user, setUser, role, setRole }: NavbarProps) {
 
   const location = useLocation(); // Get the current location URL
   const navigate = useNavigate();
-
+  const { disconnect } = useDisconnect();
 //----------------------------------------
 
 const handleLogout = () => {
+  console.log("Close session authentication ------");
+  disconnect?.();//disconnect wallet
   localStorage.removeItem("authToken"); // Delete the authentication token
   localStorage.removeItem("user");
   localStorage.removeItem("role");
+  localStorage.removeItem("walletAddress");
   setTokenAuth(null);
   setUser(null);
   setRole(null);
-  navigate("/"); // Redirigir al inicio de sesión
+  navigate("/"); // Redirect to the home page
+
 };
+//--------------------------------------
+//-- Check if the token has expired
+  useEffect(() => {
+    if (tokenAuth) {
+      try {
+        const decoded = jwtDecode<JwtPayload>(tokenAuth);
+
+        if (!decoded.exp) {
+          console.error("The 'exp' claim is missing in the token.");
+          handleLogout();
+          return;
+        }
+        const expirationTime = decoded.exp * 1000; // Convert to milliseconds
+        const timeLeft = expirationTime - Date.now();
+
+        if (timeLeft > 0) {
+          const timeoutId = setTimeout(() => {
+            handleLogout();
+          }, timeLeft);
+          return () => clearTimeout(timeoutId);
+        } else {
+          handleLogout();
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        handleLogout();
+      }
+    }
+  }, [tokenAuth]);
 //----------------------------------------
   return (
     <Disclosure as="nav" className="bg-[#012068]">

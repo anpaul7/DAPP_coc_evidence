@@ -1,3 +1,4 @@
+
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useConnect, useReadContract } from 'wagmi';
 import { contractAddress_DE_deploy } from '../../assets/constants';
@@ -18,11 +19,6 @@ interface HomeProps {
 function Home({ tokenAuth, setTokenAuth, setUser, setRole}: HomeProps) {
 
   const { address, isConnected } = useAccount(); //conect to wallet
-  //const [tokenAuth, setTokenAuth] = useState(localStorage.getItem("authToken")|| "");//authentication token
-  console.log("Wallet Address:", address);
-  //console.log("Token Auth:", tokenAuth);
-
-//----------------------------------------
 
 //---- authentication user
   const handleAuthenticateUser= async (user: string, password: string, resetFieldsLogin:()=>void) => { 
@@ -57,9 +53,9 @@ function Home({ tokenAuth, setTokenAuth, setUser, setRole}: HomeProps) {
         }
 
         const data = await response.json();
-        console.log("Response server login:", data); 
+
         if (!data.access_token || !data.role) {
-          toast.error('The session token has expired. Sign in again. revisar!!', { autoClose: 2000 });
+          toast.error('The session token has expired. Sign in again.', { autoClose: 2000 });
           throw new Error("The API did not return an access_token and role");
         }
 
@@ -71,9 +67,6 @@ function Home({ tokenAuth, setTokenAuth, setUser, setRole}: HomeProps) {
         setRole(data.role);
 
         resetFieldsLogin(); //clear fields form login user
-        //toast.success('Successful login', { autoClose: 2000 });
-        console.log("login user role: ", data.role); 
-
     }catch(error){
         console.error('Error authenticating user:',error);
     }
@@ -98,12 +91,14 @@ function Home({ tokenAuth, setTokenAuth, setUser, setRole}: HomeProps) {
     isRefetching: isRefetchingContract} = useReadContract({ //hub to contract
     address: contractAddress_DE_deploy, //address of the contract deployed
     abi: abi,//abi of the contract
-    functionName: "getEvidenciaAll", //function to call on the contract
-    args: [1], //args to pass to the function, args: [address],
+    functionName: "recordsEvidence", //function to call on the contract
+    args: [0], //args to pass to the function, args: [address],
   })
 
   //data result console 
   // refetch(); //funciona con readContract
+  //validate data contract result
+  /*
   useEffect(() => {
       console.log("dataContract:", datagetEvidenciaAll); //function result contract
       console.log("isLoadingContract:", isLoadingContract);
@@ -114,6 +109,7 @@ function Home({ tokenAuth, setTokenAuth, setUser, setRole}: HomeProps) {
     }, [datagetEvidenciaAll, isLoadingContract, errorContract,
       isSuccessContract, isRefetchingContract] 
   );
+  */
 //--------------------------------
   // authentication component initialization page
   useEffect(() => {  
@@ -122,7 +118,13 @@ function Home({ tokenAuth, setTokenAuth, setUser, setRole}: HomeProps) {
       setTokenAuth(storedToken);
     }
   }, [setTokenAuth]); // executed only once
-
+//-- get wallet address in local storage
+  useEffect(() => {
+    if (isConnected && address) {
+      localStorage.setItem("walletAddress", address);
+      //console.log("Wallet address stored:", address);
+    }
+  }, [isConnected, address]);
 //--------------------------------
 
 return (
@@ -140,54 +142,7 @@ return (
           <div className="mt-4">
             <img src={homeImage} alt="CustodyBlock" className="w-30 h-auto mx-auto rounded-lg shadow-lg" />
           </div>
-          {/* 
-          <div className="grid grid-cols-9 items-center justify-center w-full mt-4 gap-x-8">
-              <div className="flex flex-col items-center space-y-4">
-              
-              </div>
-              <div className="flex flex-col items-center space-y-4">
-              
-            </div> 
-            <div className="flex flex-col items-center space-y-4">
-              <FcFolder  className="size-14" />
-              <FcMultipleDevices className="size-20" />
-              <FcImageFile   className="size-14" />
-            </div>
             
-            
-            <div className="flex flex-col items-center space-y-4">
-              <FcAdvance className="size-14" />
-            </div>
-              <div className="flex flex-col items-center space-y-4">
-                <FcDataRecovery className="size-20 "/>
-                <FcDataEncryption className="mx-auto size-20 "/>
-                <FcDataConfiguration className="mx-auto size-20 "/>
-                <FcDataBackup  className="mx-auto size-20 " />
-                <FcAcceptDatabase className="mx-auto size-20 "/>
-              </div>
-              <div className="flex flex-col items-center space-y-4">
-                <FcAdvance className=" size-14 "/>
-              </div>
-              
-              <div className="flex flex-col items-center space-y-2">
-              <FcReadingEbook className="size-20 "/> 
-                
-                <FcManager className="size-20"/>
-              </div>
-              <div className="flex flex-col items-center space-y-0">
-                <FcPodiumWithSpeaker className=" size-20  "/>
-                <div>
-                <FcOk className=" flex size-5 flex "/>
-                <FcDisclaimer className="flex size-5 flex "/>
-                </div>
-              </div>   
-              <div className="flex flex-col items-center space-y-4">
-                
-              </div>
-                    
-            
-          </div>
-          */}  
           <p className="mt-4">
             Operations for registration, storing and tracing digital evidence in computer forensic processes.
           </p>

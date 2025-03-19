@@ -29,9 +29,10 @@ function App() {
     <div className="flex flex-col">
       <BrowserRouter>
         <Navbar 
-        tokenAuth={tokenAuth} setTokenAuth={setTokenAuth} 
-        user={user} setUser={setUser} 
-        role={role} setRole={setRole} />
+        tokenAuth={tokenAuth} 
+        setTokenAuth={setTokenAuth} 
+        user={user || ""} setUser={setUser} 
+        role={role || ""} setRole={setRole} />
 
         <Routes>
           <Route path="/" element={<Home tokenAuth={tokenAuth} setTokenAuth={setTokenAuth} setUser={setUser} setRole={setRole}/>} />
