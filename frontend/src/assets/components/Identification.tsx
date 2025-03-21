@@ -297,7 +297,7 @@ function Identification () {
           parseInt(formData2.userId), formData2.names, 
           formData2.lastNames, formData2.userType
         ],
-        ["preservation","custody","noStateDate",
+        ["preservation","custody",formData2.registrationDate,
           "noFileTecnical","noFileExecutive"
         ]
       ];

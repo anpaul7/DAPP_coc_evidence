@@ -90,7 +90,8 @@ contract Prueba4 {
             bytes(_detailsEvidence.methodAdquisition).length == 0 ||
             bytes(_detailsEvidence.noteEvidence).length == 0 || _detailsEvidence.userId == 0 ||
             bytes(_detailsEvidence.names).length == 0 || bytes(_detailsEvidence.lastNames).length == 0 ||
-            bytes(_detailsEvidence.userType).length == 0
+            bytes(_detailsEvidence.userType).length == 0 ||
+            bytes(_phaseEvidence.stateUpdateDate).length == 0
             ){ 
                 return false;
             }
@@ -100,7 +101,6 @@ contract Prueba4 {
             _dataEvidence.id = currentId;
             _phaseEvidence.phase = "preservation";
             _phaseEvidence.state = "custody";
-            _phaseEvidence.stateUpdateDate = "noStateDate";
             _phaseEvidence.technicalReport = "noFileTecnical";
             _phaseEvidence.executiveReport = "noFileExecutive";
 

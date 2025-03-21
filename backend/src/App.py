@@ -7,6 +7,7 @@ from pymongo import MongoClient
 from flask_pymongo import PyMongo, ObjectId
 from dotenv import load_dotenv
 from flask_jwt_extended import create_access_token, jwt_required, JWTManager
+from flask import send_from_directory
 
 #-- call env 
 load_dotenv()
@@ -30,7 +31,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=40) # time to expire 
 
 #-- Config the upload folder
 UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), UPLOAD_FOLDER)
 
 #-- Exists theupload folder
 if not os.path.exists(UPLOAD_FOLDER):
@@ -138,13 +139,24 @@ def upload_file():
         print(f"Digital evidence file uploaded: {unique_filepath}")
         print(f"Generated digital evidence hash: {file_hash}")
 
+        relative_file_path = os.path.join("src", os.getenv('UPLOAD_FOLDER', 'uploads'), new_filename)
         return jsonify({"message": " Digital evidence uploaded and hash generated successfully", 
-                        "file_path": unique_filepath,
+                        "file_path": relative_file_path,
                         "file_hash": file_hash
             }), 201
     except Exception as e:
         print(f"Error in upload_file: {str(e)}")
         return jsonify({"Error": "Internal Server Error", "Details": str(e)}), 500
+
+#---------------------------------------------------
+
+@app.route('/download/<path:filename>', methods=['GET'])
+@jwt_required() 
+def download_file(filename):
+    full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    print(f"Filename: {filename}")
+    print(f"Full file path: {full_path}")
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True) 
 
 #---------------------------------------------------
 @app.route('/users', methods=['POST']) #create user
@@ -208,14 +220,13 @@ def registerEvidence():
         'evidenceType': data.get('evidenceType'),
         'hashEvidence': data.get('hashEvidence'),
         'filePath': data.get('filePath'),
+        'registrationDate': data.get('registrationDate'), 
         'methodAdquisition': data.get('methodAdquisition'),
         'noteEvidence': data.get('noteEvidence'),
-
         'userId': data.get('userId'),
         'names': data.get('names'),
         'lastNames': data.get('lastNames'),
         'userType': data.get('userType'),
-         
         'technicalReport': 'noFile',
         'executiveReport': 'noFile',
 

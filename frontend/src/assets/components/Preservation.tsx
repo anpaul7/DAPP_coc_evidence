@@ -3,8 +3,9 @@ import { abi } from '../../assets/abis/coc_evidence_digitalABI';
 import { contractAddress_DE_deploy } from '../../assets/constants';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import {  FcDocument,  FcFinePrint, FcFolder,  FcReuse } from 'react-icons/fc';
-import { TransactionSerialized } from 'viem';
+import { FcFinePrint, FcFolder,  FcReuse } from 'react-icons/fc';
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
+import { CheckCircleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
 const API = import.meta.env.VITE_API_SERVER_FLASK;//URL server backend
 
@@ -36,12 +37,15 @@ interface EvidenceData {
 function Preservation() {
 
   const [tokenAuth, setTokenAuth] = useState('');//authentication token 
-  const [showTableEvidenceBC, setShowTableEvidenceBC] = useState(true);  //show first form
+  const [showBlockchainTable, setShowBlockchainTable] = useState(false);
+  const [showEvidenceDataTable, setShowEvidenceDataTable] = useState(true);
   const [showLeftSection, setShowLeftSection] = useState(true);
   const [evidenceData, setEvidenceData] = useState<EvidenceData[]>([]);
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [blockchainEvidence, setBlockchainEvidence] = useState<any>(null);
+  const [downloadConfirmOpen, setDownloadConfirmOpen] = useState(false);
+  const [nextPhaseConfirmOpen, setNextPhaseConfirmOpen] = useState(false);
 //----------------------------------------
 //----------------------------------------
 //----------------------------------------
@@ -82,14 +86,109 @@ const {
     }
     try {
       const result = await refetchBlockchain();
-      setBlockchainEvidence(result.data);
-      console.log("blockchainData:", blockchainData);
+      const data = result.data;
+      
+      let blockchainHash = "";
+      if (Array.isArray(data) && data.length > 0) {
+        const firstRecord = data[0];
+        if (firstRecord && firstRecord.hashEvidence) {
+          blockchainHash = firstRecord.hashEvidence;
+        }
+      }    
+      const record = evidenceData.find(e => e._id === selectedEvidenceId);
+      if (record) {
+        if (record.hashEvidence !== blockchainHash) {
+          toast.error("The evidence is not registered in the blockchain", { autoClose: 2000 });
+          setBlockchainEvidence(null);
+          return false;
+        }
+      }
+      setBlockchainEvidence(data);
+      return true;
     } catch (error) {
       console.error("Error fetching blockchain evidence:", error);
       toast.error("Error fetching blockchain evidence", { autoClose: 2000 });
+      return false;
     }
   };
+  //----------------------------------------
+  const handleShowEvidence = async () => {
+    if (selectedEvidenceId === null) {
+      toast.error("Please select an evidence record.", { autoClose: 2000 });
+      return;
+    }
+    const isValid = await getEvidenceBlockchain();
+    if (isValid) {
+      setShowBlockchainTable(true);
+      setShowEvidenceDataTable(false);
+    } else {
+      setShowBlockchainTable(false);
+    }
+  };
+  //----------------------------------------
+  const downloadEvidence = async () => {
+    const record = evidenceData.find(e => e._id === selectedEvidenceId);
+    if (record && record.filePath) {// validate filePath exists
+      const token = localStorage.getItem('authToken');
+      const filename = record.filePath.split('/').pop();
 
+      const fileUrl = `${API}/download/${filename}`;
+      const encodedUrl = encodeURI(fileUrl);
+      console.log("Download URL:", encodedUrl);
+      console.log("file:", encodedUrl);
+      try {
+        const response = await fetch(encodedUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Download failed:: ", response.status, errorText);
+          throw new Error('Download failed');
+        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        // Extrae el nombre del archivo
+        const filename = record.filePath.split('/').pop() || 'download';
+        console.log("file2:", filename);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        toast.error("Error downloading file", { autoClose: 2000 });
+        console.error(error);
+      }
+    } else {
+      toast.error("No file found for selected evidence", { autoClose: 2000 });
+    }
+  };
+  //----------------------------------------
+  const handleDownloadButton = () => {
+    setDownloadConfirmOpen(true);
+  };
+  const confirmDownload = async () => {
+    setDownloadConfirmOpen(false);
+    await downloadEvidence();
+  };
+  //----------------------------------------
+  const handleNextPhaseButton = () => {
+    setNextPhaseConfirmOpen(true);
+  }
+
+  const confirmNextPhase = async () => {
+    setNextPhaseConfirmOpen(false);
+    //await downloadEvidence();
+  };
+  //----------------------------------------
+  const handleBack = () => { 
+    setShowBlockchainTable(false);
+    setShowEvidenceDataTable(true);
+  };
   //-------------------------------------
   useEffect(() => { //get token authentication
     const storedToken = localStorage.getItem("authToken");
@@ -136,32 +235,27 @@ return (
     {/* Section line */}
     <div className="w-[3px] bg-gray-800 shadow-2xl shadow-black/50 "></div>
     {/* Section right   */}
-
-
+    
     <div className="w-[80%] flex flex-col justify-start items-center bg-[#010f1f] text-white p-1 mt-3">
-       
-      <h1 className='text-xl text-white font-bold text-center flex-col'>
-      Chain-of-Custody Digital Evidence</h1>
-      <table className="w-[90%] divide-y divide-gray-200">
-        <tbody>
-          <tr>
-            <td className="px-1 py-4 text-center" colSpan={16}>
-              <div className="flex justify-left gap-4">
-                <button 
-                  onClick={getEvidenceBlockchain}
-                  type="button" 
-                  className="rounded-md bg-primary-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                  Show evidence
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    
+    {showEvidenceDataTable && ( 
+      <div className="w-full max-w-[90%] mx-auto mt-4">
+        <h1 className='text-xl text-white font-bold text-center flex-col'>
+        List of registered evidences  </h1>    
+        <div className="flex justify-left">
+          <button
+            onClick={handleShowEvidence}
+            type="button"
+            className="rounded-md bg-primary-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Show evidence
+          </button>
+        </div>
+      </div>
+    )}
+    {showEvidenceDataTable && ( 
       <div className="w-full max-w-[90%] overflow-x-auto mx-auto mt-2">    
-      
         <div className="inline-block min-w-full py-1 ">
-          
           <div className="overflow-x-auto overflow-y-auto max-h-[320px] border border-gray-200 shadow dark:border-gray-700 dark:bg-gray-800">
             <table className="min-w-[1400px] divide-y divide-gray-200">
               <thead className="sticky top-0 z-10 border-b bg-[#455a64] font-medium text-white dark:border-neutral-500 dark:bg-neutral-900">
@@ -277,17 +371,40 @@ return (
             </table>
           </div> 
         </div>
-      </div>
+      
+    </div>
+    )}
+
   {/*----------------------------------------*/}    
-      {showTableEvidenceBC && (
+      {showBlockchainTable && (
         <>
           {Array.isArray(blockchainEvidence) &&
             blockchainEvidence.length > 0 ? (
 
             <div className="w-full max-w-[80%]  mx-auto mt-6">
               <h2 className="text-xl font-bold text-white text-center mb-4">
-                Description status of evidence recorded in the blockchain
+              ID {"["+selectedEvidenceId+"]"} : Evidence status recorded in blockchain 
               </h2>
+              <div className="flex justify-end mt-4 gap-4">
+                <button
+                  onClick={handleBack}
+                  type="button" 
+                  className="rounded-md bg-primary-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                  To Back
+                </button>
+                <button 
+                  onClick={handleDownloadButton}
+                  type="button" 
+                  className="rounded-md bg-primary-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                  Download Evidence
+                </button>
+                <button 
+                  onClick={handleNextPhaseButton}
+                  type="button" 
+                  className="rounded-md bg-primary-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                  Analysis Phase
+                </button>
+              </div>
               <div className="inline-block min-w-full py-2">
                 <div className="overflow-hidden border border-gray-200 shadow dark:border-gray-700 dark:bg-gray-800">
                   <table className="w-full divide-y divide-gray-200">
@@ -297,7 +414,7 @@ return (
                         Description
                       </th>
                       <th className="px-3 py-3 text-start text-base font-medium uppercase">
-                        Data Evidence
+                        Evidence data recorded on the blockchain
                       </th>
                     </tr>
                     </thead>
@@ -305,7 +422,7 @@ return (
                       {blockchainEvidence.map((item, index) => (
                         <tr key={index} className="odd:bg-white even:bg-gray-100 hover:bg-blue-50">
                           <td className="px-3 py-4 text-base text-gray-800">
-                            Registro {index + 1}
+                            Information {index + 1}
                           </td>
                           <td className="px-3 py-4 text-base text-gray-800">
                             {Object.entries(item).map(([key, value]) => (
@@ -318,32 +435,54 @@ return (
                       ))}
                     </tbody>
                   </table>
-                  
                 </div>
-                <table className="w-[90%] divide-y divide-gray-200 justify-right ">
-                <tbody>
-                  <tr>
-                    <td className="px-1 py-4 text-center" colSpan={16}>
-                      <div className="flex justify-right gap-4">
-                        <button 
-                          onClick={getEvidenceBlockchain}
-                          type="button" 
-                          className="rounded-md bg-primary-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                          To Back
-                        </button>
-                        <button 
-                          onClick={getEvidenceBlockchain}
-                          type="button" 
-                          className="rounded-md bg-primary-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                          Get Evidence
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
               </div>
-              
+
+              {(() => {
+                const record = evidenceData.find(e => e._id === selectedEvidenceId);
+                if (record && record.transactions && record.transactions.length > 0) {
+                  return (
+                    <div className="mt-8">
+                      <h3 className="text-lg font-bold text-white text-center mb-2">
+                        Report on transactions made on the Blockchain
+                      </h3>
+                      <div className="inline-block min-w-full py-2">
+                        <div className="overflow-hidden border border-gray-200 shadow dark:border-gray-700 dark:bg-gray-800">
+                          <table className="w-full divide-y divide-gray-200">
+                            <thead className="sticky top-0 z-10 border-b bg-[#455a64] text-white">
+                              <tr>
+                                <th className="px-3 py-3 text-start text-base font-medium uppercase">
+                                  Description
+                                </th>
+                                <th className="px-3 py-3 text-start text-base font-medium uppercase">
+                                  Transaction Data
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {record.transactions.map((tx, i) => (
+                                <tr key={i} className="odd:bg-white even:bg-gray-100 hover:bg-blue-50">
+                                  <td className="px-3 py-4 text-base text-gray-800">
+                                    Transaction {i + 1}
+                                  </td>
+                                  <td className="px-3 py-4 text-base text-gray-800">
+                                    {Object.entries(tx).map(([key, value]) => (
+                                      <div key={key}>
+                                        <strong>{key}:</strong> {String(value)}
+                                      </div>
+                                    ))}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
           ) : (
             <div className="w-full max-w-[90%] mx-auto mt-6">
@@ -360,6 +499,116 @@ return (
     <h2 className="text-3xl text-white font-bold text-center flex-col">
       Por favor, inicie sesión</h2>
   )}
+{/* --- Download Evidence Modal */}
+<Dialog
+      open={downloadConfirmOpen}
+      onClose={() => setDownloadConfirmOpen(false)}
+      className="relative z-10"
+    >
+      <DialogBackdrop
+        transition
+        className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+      />
+      <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <DialogPanel
+            transition
+            className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+          >
+            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="sm:flex sm:items-start">
+                <div className="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <InformationCircleIcon aria-hidden="true" className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                  <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
+                    Download Evidence
+                  </DialogTitle>
+                  <div className="mt-2">
+                    <p className="text-lg text-gray-500">
+                    Are you sure you want to download the digital evidence?
+                      <br />
+                      Click on confirm.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:space-x-4 sm:space-x-reverse sm:px-6 justify-center items-center">
+              <button
+                type="button"
+                onClick={confirmDownload}
+                className="bg-primary-600 text-white hover:bg-primary-700 rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                Confirm
+              </button>
+              <button
+                type="button"
+                onClick={() => setDownloadConfirmOpen(false)}
+                className="rounded-md bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                Cancel
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
+      </div>
+    </Dialog>
+    {/* --- Next Phase Modal */}
+    <Dialog
+      open={nextPhaseConfirmOpen}
+      onClose={() => setNextPhaseConfirmOpen(false)}
+      className="relative z-10"
+    >
+      <DialogBackdrop
+        transition
+        className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+      />
+      <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <DialogPanel
+            transition
+            className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+          >
+            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="sm:flex sm:items-start">
+                <div className="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <InformationCircleIcon aria-hidden="true" className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                  <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
+                    Next Phase
+                  </DialogTitle>
+                  <div className="mt-2">
+                    <p className="text-lg text-gray-500">
+                    Do you want to shift digital evidence to the Analysis Phase?
+                      <br />
+                      Click on confirm.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:space-x-4 sm:space-x-reverse sm:px-6 justify-center items-center">
+              <button
+                type="button"
+                onClick={confirmDownload}
+                className="bg-primary-600 text-white hover:bg-primary-700 rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                Confirm
+              </button>
+              <button
+                type="button"
+                onClick={() => setNextPhaseConfirmOpen(false)}
+                className="rounded-md bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                Cancel
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
+      </div>
+    </Dialog>
   </div>
   );
 };

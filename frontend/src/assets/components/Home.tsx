@@ -72,44 +72,12 @@ function Home({ tokenAuth, setTokenAuth, setUser, setRole}: HomeProps) {
     }
   };
 
-  const {data:dataContract, /* refetch*/} = useReadContract({ //hub to contract
+  const {data:dataContract, isLoading: isLoadingContract } = useReadContract({ //hub to contract
     address: contractAddress_DE_deploy, //address of the contract deployed
     abi: abi,//abi of the contract
     functionName: "getNameContract", //function to call on the contract
     args: [], //args to pass to the function, args: [address],
   })
-
-  const {data:getAdrress} = useReadContract({ //hub to contract
-    address: contractAddress_DE_deploy, //address of the contract deployed
-    abi: abi,//abi of the contract
-    functionName: "getAdrress", //function to call on the contract
-    args: [0], //args to pass to the function, args: [address],
-  })
-
-  const {data:datagetEvidenciaAll, isLoading: isLoadingContract,
-    error: errorContract, isSuccess: isSuccessContract, 
-    isRefetching: isRefetchingContract} = useReadContract({ //hub to contract
-    address: contractAddress_DE_deploy, //address of the contract deployed
-    abi: abi,//abi of the contract
-    functionName: "recordsEvidence", //function to call on the contract
-    args: [0], //args to pass to the function, args: [address],
-  })
-
-  //data result console 
-  // refetch(); //funciona con readContract
-  //validate data contract result
-  /*
-  useEffect(() => {
-      console.log("dataContract:", datagetEvidenciaAll); //function result contract
-      console.log("isLoadingContract:", isLoadingContract);
-      console.log("contractError:", errorContract);
-      console.log("isSuccessContract", isSuccessContract);
-      console.log("isRefetchingGetName", isRefetchingContract);
-      console.log("___________");
-    }, [datagetEvidenciaAll, isLoadingContract, errorContract,
-      isSuccessContract, isRefetchingContract] 
-  );
-  */
 //--------------------------------
   // authentication component initialization page
   useEffect(() => {  
@@ -128,64 +96,48 @@ function Home({ tokenAuth, setTokenAuth, setUser, setRole}: HomeProps) {
 //--------------------------------
 
 return (
-  <>
-   {/* Header <Navbar tokenAuth={tokenAuth} setTokenAuth={setTokenAuth} /> */}
-
-    <main className='w-full flex  min-h-screen ' >
-      
-      {/* Secction left 010f1f*/}
-
-      <div className="w-1/2 flex items-center justify-center bg-[#010f1f] text-white p-8">
-
-        <div className="text-center">
-          <h1 className="text-4xl font-bold">Chain-of-Custody Digital Evidence</h1>
-          <div className="mt-4">
-            <img src={homeImage} alt="CustodyBlock" className="w-30 h-auto mx-auto rounded-lg shadow-lg" />
+<>
+  <main className='w-full flex  min-h-screen ' >  
+  {/* ------- Secction left */}
+  <div className="w-1/2 flex flex-col justify-start bg-[#010f1f] text-white p-8">
+  <div className="pt-20">
+    <img
+      src={homeImage}
+      alt="CustodyBlock"
+      className="w-30 h-auto mx-auto rounded-lg shadow-lg"
+    />
+  </div>
+</div>   
+  {/* ------- Section right 111827 bg-gray-950*/}
+    <div className="w-1/2 flex flex-col justify-start items-center bg-[#111827] text-white p-1 mt-20">
+      <LoginForm onLogin={handleAuthenticateUser} />
+      {tokenAuth ? (
+        <>
+          <div className="mt-8">
+            <ConnectButton />
           </div>
-            
-          <p className="mt-4">
-            Operations for registration, storing and tracing digital evidence in computer forensic processes.
-          </p>
-          <div className="mt-4 text-black">
-            Data Records Evidence Contract: {datagetEvidenciaAll?.toString()}
+          <div>
+            {isConnected ? (
+              <div className="my-5 px-4">
+                <p>
+                  <span> Wallet Address: </span>
+                  <p className="text-red-500">{isLoadingContract ? (<span className="opacity-70 text-white">Loading..."</span>) : address}</p>
+                  <p className="text-white">{isLoadingContract ? (<span className="opacity-70">Loading..."</span>) : (dataContract?.toString())}</p>
+                </p>
+              </div>
+            ) : (
+              <div className="text-1xl text-red-500 text-center flex-col">
+                Connect your metamask wallet
+              </div>
+            )}
           </div>
-        </div>
-      </div>
-      
-      {/* Section right */}
-
-      <div className="w-1/2 flex flex-col justify-start items-center bg-gray-900 text-white p-1 mt-20">
-        
-        <LoginForm onLogin={handleAuthenticateUser} />
-
-        {tokenAuth ? (
-          <>
-            <div className="mt-8">
-              <ConnectButton />
-            </div>
-            <div>
-              {isConnected ? (
-                <div className="my-5 px-4">
-                  <p>
-                    <span> Wallet Address: </span>
-                    <p className="text-red-500">{isLoadingContract ? (<span className="opacity-70 text-white">Loading..."</span>) : address}</p>
-                    <p className="text-white">{isLoadingContract ? (<span className="opacity-70">Loading2..."</span>) : (dataContract?.toString())}</p>
-                  </p>
-                </div>
-              ) : (
-                <div className="text-1xl text-red-500 text-center flex-col">
-                  Please connect your wallet to use the Chain-of-Custody Digital Evidence
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <h2 className="text-3xl font-bold text-center">Por favor, inicie sesión</h2>
-        )}
-
-      </div>
-    </main>
-  </>
+        </>
+      ) : (
+        <h2 className="text-3xl font-bold text-center">Login to your account</h2>
+      )}
+    </div>
+  </main>
+</>
 );
  
 };
