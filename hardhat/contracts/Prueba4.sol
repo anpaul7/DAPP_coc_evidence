@@ -99,8 +99,8 @@ contract Prueba4 {
             uint256 currentId = registerId;//increment position id
 
             _dataEvidence.id = currentId;
-            _phaseEvidence.phase = "preservation";
-            _phaseEvidence.state = "custody";
+            _phaseEvidence.phase = "Preservation";
+            _phaseEvidence.state = "Custody";
             _phaseEvidence.technicalReport = "noFileTecnical";
             _phaseEvidence.executiveReport = "noFileExecutive";
 

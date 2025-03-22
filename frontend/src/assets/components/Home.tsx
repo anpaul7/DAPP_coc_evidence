@@ -1,10 +1,10 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { useAccount, useConnect, useReadContract } from 'wagmi';
+import { useAccount, useReadContract } from 'wagmi';
 import { contractAddress_DE_deploy } from '../../assets/constants';
 import { abi } from '../../assets/abis/coc_evidence_digitalABI';
 import homeImage from '../../assets/images/CustodyBlock.png';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import LoginForm from "../../assets/components/LoginUser"; 
 import { toast } from 'react-toastify';
 
@@ -118,12 +118,9 @@ return (
           </div>
           <div>
             {isConnected ? (
-              <div className="my-5 px-4">
-                <p>
+              <div className="my-5 px-4 items-center text-center">
                   <span> Wallet Address: </span>
                   <p className="text-red-500">{isLoadingContract ? (<span className="opacity-70 text-white">Loading..."</span>) : address}</p>
-                  <p className="text-white">{isLoadingContract ? (<span className="opacity-70">Loading..."</span>) : (dataContract?.toString())}</p>
-                </p>
               </div>
             ) : (
               <div className="text-1xl text-red-500 text-center flex-col">
@@ -133,7 +130,7 @@ return (
           </div>
         </>
       ) : (
-        <h2 className="text-3xl font-bold text-center">Login to your account</h2>
+        <h2 className="text-xl font-bold text-center text-red-500">Login to your account</h2>
       )}
     </div>
   </main>

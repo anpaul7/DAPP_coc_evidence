@@ -237,6 +237,11 @@ def registerEvidence():
                 'phase': 'preservation',
                 'state': 'custody',
                 'txDate': data.get('registrationDate'), 
+                'userId': data.get('userId'),
+                'names': data.get('names'),
+                'lastNames': data.get('lastNames'),
+                'userType': data.get('userType'),
+                'nameUser': data.get('nameUser')
             }
         ]
     }
@@ -249,6 +254,71 @@ def registerEvidence():
         'inserted_id': str(result.inserted_id)
     }
     return jsonify(response_data),201
+
+#------------- insert evidence in db
+@app.route('/updateEvidence/<int:id>', methods=['PUT']) 
+@jwt_required() # Protected route and JWT autentication
+def updateEvidence(id):
+
+    data = request.get_json() #get data from json
+
+    if not data.get('id'):
+        return jsonify({"error": "The 'id' field isn't present"}), 400
+    
+    if int(data.get('id')) != id:
+        return jsonify({"error": "The id in the URL and in the JSON do not match"}), 400
+    
+    existing_data = collection.find_one({ "_id": int(data['id'])})
+    if not existing_data:
+        return jsonify({"error": "The 'id' not exists"}), 400
+
+    update_fields = {
+        "phase": data.get("phase"),
+        "state": data.get("state"),
+        "stateUpdateDate": data.get("stateUpdateDate")
+    }
+    update_fields = {k: v for k, v in update_fields.items() if v is not None}
+
+    new_transaction = {
+        "txId": len(existing_data.get("transactions", [])),
+        "blockchainTxHash": data.get("blockchainTxHash"),
+        "phase": data.get("phase"),
+        "state": data.get("state"),
+        "txDate": data.get("stateUpdateDate"),
+        "userId": data.get("userId"),
+        "names": data.get("names"),
+        "lastNames": data.get("lastNames"),
+        "userType": data.get("userType"),
+        "nameUser": data.get("nameUser")
+    }
+
+    result = collection.update_one(
+        {"_id": int(data['id'])},
+        {
+            "$set": update_fields, # Update the specified fields
+            "$push": {"transactions": new_transaction} # Add the new transaction
+        }
+    )
+
+    if result.modified_count == 1:
+        response_data = {"msg": "Evidence updated successfully"}
+        print(f"Response data: {response_data}")
+        return jsonify(response_data), 200
+    else:
+        return jsonify({"error": "Evidence not found or no changes made"}), 404
+
+    '''
+    "userId": data.get("userId"),
+        "names": data.get("names"),
+        "lastNames": data.get("lastNames"),
+        "userType": data.get("userType"),
+        "nameUser": data.get("nameUser"),
+        "blockchainTxHash": data.get("blockchainTxHash")
+        "phase": data.get("phase"),
+        "state": data.get("state"),
+        "stateUpdateDate": data.get("stateUpdateDate"),   
+    '''
+   
 
 #------------- verify evidence in blockchain db
 @app.route('/verify', methods=['POST']) #verify evidence in db

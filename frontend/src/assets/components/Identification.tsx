@@ -18,7 +18,8 @@ const API = import.meta.env.VITE_API_SERVER_FLASK;//URL server backend
 function Identification () {
 
   //const [evidenceFound, setEvidenceFound] = useState(null);// evidence registered in db
-  const [tokenAuth, setTokenAuth] = useState('');//authentication token 
+  const [tokenAuth, setTokenAuth] = useState('');//authentication token
+  const { isConnected } = useAccount(); //conect to wallet
 
   //use in button on click
   const [isRegistering, setRegisterEvidence] = useState(false); //state transaction blockchain register evidence
@@ -92,6 +93,12 @@ function Identification () {
 //----------------------------------------
   const uploadEvidence = async (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
+
+    if (!isConnected) {
+      toast.error("Please connect your wallet", { autoClose: 2000 });
+      return;
+    }
+
     if (!file) {
       toast.error('No file selected', { autoClose: 1000 });
       return;
@@ -173,7 +180,6 @@ function Identification () {
       console.error('Error requesting file upload:', error);
       toast.error('Error requesting file upload');
     }
-  
   };
 
   //----------------------------------------
@@ -364,6 +370,7 @@ function Identification () {
   //---- insert data digital evidence to database
   const handleInsertDB = async (_blockchainTxHash: string, _currentId: number) => { 
     try{
+      const nameUser = localStorage.getItem("user"); 
       const response = await fetch(`${API}/insert`, { //submit data to server
           method: 'POST',
           headers: {
@@ -379,7 +386,7 @@ function Identification () {
             filePath: formData2.filePath,
             hashEvidence: formData2.hashEvidence,
             registrationDate: formData2.registrationDate,
-            
+
             methodAdquisition: formData2.methodAdquisition,
             noteEvidence: formData2.noteEvidence,
             userId: parseInt(formData2.userId),
@@ -387,11 +394,12 @@ function Identification () {
             lastNames: formData2.lastNames,
             userType: formData2.userType,
 
-            phase: 'preservation',
-            state: 'custody',
+            phase: 'Preservation',
+            state: 'Custody',
             stateUpdateDate: 'noStateDate',
             technicalReport: 'noFile',
             executiveReport: 'noFile',
+            nameUser: nameUser,
             
             blockchainTxHash: _blockchainTxHash //hash of the transaction registered evidence in blockchain         
           })
@@ -645,8 +653,8 @@ return (
                 <button
                   type="submit"
                   onClick={uploadEvidence}  
-                  className="rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                >
+                  className="rounded-md bg-primary-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  >
                   Upload
                 </button>
               </div>
@@ -782,7 +790,6 @@ return (
                   <select
                     id="userType"
                     name="userType"
-                    defaultValue={formData2.userType}
                     value={formData2.userType}
                     onChange={handleChange}
                     autoComplete="userType"
@@ -1031,7 +1038,7 @@ return (
     </> 
   ) : (
     <h2 className="text-3xl text-white font-bold text-center flex-col">
-      Por favor, inicie sesión</h2>
+      Login to Custody Block</h2>
   )}
   
 

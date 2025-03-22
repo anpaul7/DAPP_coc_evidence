@@ -22,7 +22,11 @@ export const config: ReturnType<typeof getDefaultConfig> = getDefaultConfig({
 //--instant connect for 
 const queryClient = new QueryClient();
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const container = document.getElementById('root')!;
+const root = (window as any).__root || ReactDOM.createRoot(container);
+(window as any).__root = root;
+
+root.render(
   <React.StrictMode>
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
@@ -36,4 +40,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </WagmiProvider>
     
   </React.StrictMode>,
-)
+);
+
