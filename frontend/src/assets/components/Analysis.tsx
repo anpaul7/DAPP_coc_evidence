@@ -5,7 +5,7 @@ import { waitForTransactionReceipt } from 'wagmi/actions';
 import { config } from '../../main';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { FcFinePrint, FcFolder,  FcManager,  FcReuse } from 'react-icons/fc';
+import { FcDocument, FcFinePrint, FcFolder,  FcManager,  FcReuse } from 'react-icons/fc';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ChevronDownIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
@@ -41,15 +41,24 @@ function Analysis() {
   const [tokenAuth, setTokenAuth] = useState('');//authentication token 
   const { isConnected } = useAccount(); //conect to wallet
   const {writeContractAsync: writeTx2} = useWriteContract(); //hub wagmi write in contract
+  const [file2, setFile2] = useState<File | null>(null); // state file
+  const [file3, setFile3] = useState<File | null>(null); // state file
+  const [fileName2, setFileName2] = useState('');
+  const [fileName3, setFileName3] = useState('');
   const [showBlockchainTable, setShowBlockchainTable] = useState(false);
   const [showEvidenceDataTable, setShowEvidenceDataTable] = useState(true);
-  const [showFirstForm, setShowFirstForm] = useState(false);  //show first form
+  const [showFirstForm, setShowFirstForm] = useState(false); 
+  const [showUploadForm, setShowUploadForm] = useState(false); 
   const [showLeftSection, setShowLeftSection] = useState(true);
   const [evidenceData, setEvidenceData] = useState<EvidenceData[]>([]);
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [blockchainEvidence, setBlockchainEvidence] = useState<any>(null);
   const [downloadConfirmOpen, setDownloadConfirmOpen] = useState(false);
+  const [confirmDownloadTechnical, setDownloadTechnical] = useState(false);
+  const [confirmDownloadExecutive, setDownloadExecutive] = useState(false);
+
+
   const [nextPhaseConfirmOpen, setNextPhaseConfirmOpen] = useState(false);
 //----------------------------------------
   const [formData2, setFormData] = useState({
@@ -57,7 +66,10 @@ function Analysis() {
     names: '',
     lastNames: '',
     userType: '',
+    fileTechnicalReport: '',
+    fileExecutiveReport: '',
   });
+//----------------------------------------
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
@@ -74,6 +86,17 @@ const clearForm = () => { // clear box data form to default
     lastNames: '',
     userType: "",
   }));
+};
+const clearForm2 = () => { // clear box data form to default
+  setFormData(prevState => ({
+    ...prevState,
+    fileTechnicalReport: '',
+    fileExecutiveReport: '',
+  }));
+  setFile2(null);
+  setFileName2('');
+  setFile3(null);
+  setFileName3('');
 };
 //----------------------------------------
   const getEvidenceData = async () => {
@@ -97,7 +120,7 @@ const clearForm = () => { // clear box data form to default
   };
 //----------------------------------------
 const {
-  data: blockchainData,
+  data: blockchainData2,
     refetch: refetchBlockchain, //get data blockchain
   } = useReadContract({
     address: contractAddress_DE_deploy,
@@ -177,8 +200,105 @@ const {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        // Extrae el nombre del archivo
         const filename = record.filePath.split('/').pop() || 'download';
+        //console.log("file2:", filename);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        toast.error("Error downloading file", { autoClose: 2000 });
+        console.error(error);
+      }
+    } else {
+      toast.error("No file found for selected evidence", { autoClose: 2000 });
+    }
+  };
+//----------------------------------------
+  const downloadTechnical = async () => {
+    const record = evidenceData.find(e => e._id === selectedEvidenceId);
+
+    if (record && blockchainEvidence &&
+      Array.isArray(blockchainEvidence) &&
+      blockchainEvidence.length >= 3 &&
+      blockchainEvidence[2]) {// validate technicalReport
+      
+      const token = localStorage.getItem('authToken');
+      const fileTechnicalReport = blockchainEvidence[2].technicalReport;
+      const filename = fileTechnicalReport.includes('/')
+        ? fileTechnicalReport.split('/').pop()
+        : fileTechnicalReport;
+
+      const fileUrl = `${API}/download2/${filename}`;
+      const encodedUrl = encodeURI(fileUrl);
+      console.log("Download URL:", encodedUrl);
+      console.log("file:", encodedUrl);
+      try {
+        const response = await fetch(encodedUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Download failed:: ", response.status, errorText);
+          throw new Error('Download failed');
+        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const filename = record.filePath.split('/').pop() || 'download2';
+        console.log("file2:", filename);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        toast.error("Error downloading file", { autoClose: 2000 });
+        console.error(error);
+      }
+    } else {
+      toast.error("No file found for selected evidence", { autoClose: 2000 });
+    }
+  };
+//----------------------------------------
+const downloadExecutive = async () => {
+    const record = evidenceData.find(e => e._id === selectedEvidenceId);
+
+    if (record && blockchainEvidence &&
+      Array.isArray(blockchainEvidence) &&
+      blockchainEvidence.length >= 3 &&
+      blockchainEvidence[2]) {// validate executiveReport
+      
+      const token = localStorage.getItem('authToken');
+      const fileExecutiveReport = blockchainEvidence[2].executiveReport;
+      const filename = fileExecutiveReport.includes('/')
+        ? fileExecutiveReport.split('/').pop()
+        : fileExecutiveReport;
+
+      const fileUrl = `${API}/download3/${filename}`;
+      const encodedUrl = encodeURI(fileUrl);
+      console.log("Download URL:", encodedUrl);
+      console.log("file:", encodedUrl);
+      try {
+        const response = await fetch(encodedUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Download failed:: ", response.status, errorText);
+          throw new Error('Download failed');
+        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const filename = record.filePath.split('/').pop() || 'download3';
         console.log("file2:", filename);
         a.href = url;
         a.download = filename;
@@ -198,12 +318,232 @@ const {
   const handleDownloadButton = () => {
     setDownloadConfirmOpen(true);
   };
+  const handleDownloadTechnical = () => {
+    setDownloadTechnical(true);
+  };
+  const handleDownloadExecutive = () => {
+    setDownloadExecutive(true);
+  };
+  //----------------------------------------
   const confirmDownload = async () => {
     setDownloadConfirmOpen(false);
     await downloadEvidence();
   };
+  const confirmDownload2 = async () => {
+    setDownloadConfirmOpen(false);
+    await downloadTechnical();
+  };
+  const confirmDownload3 = async () => {
+    setDownloadConfirmOpen(false);
+    await downloadExecutive();
+  };
   //----------------------------------------
-  const nextPhase = async () => {
+  const handleFileChange2 = (e) => {
+    const selectedFile = e.target.files[0];
+    setFile2(selectedFile);
+    if (selectedFile) {
+      setFileName2(selectedFile.name);  // Update the fileName state
+      console.log("Selected file:", selectedFile.name);
+    }
+  };
+  //----------------------------------------
+  const handleFileChange3 = (e) => {
+    const selectedFile3 = e.target.files[0];
+    setFile3(selectedFile3);
+    if (selectedFile3) {
+      setFileName3(selectedFile3.name);  // Update the fileName state
+      console.log("Selected file:", selectedFile3.name);
+    }
+  };
+  //----------------------------------------
+  const uploadTechnicalReport= async (e) => {
+    e.preventDefault(); // Prevent the default form submission behavior
+
+    if (!isConnected) {
+      toast.error("Please connect your wallet", { autoClose: 2000 });
+      return;
+    }
+    if (selectedEvidenceId === null) {
+      toast.error("No evidence selected", { autoClose: 1500 });
+      return;
+    }
+    if (!file2) {
+      toast.error('No file selected', { autoClose: 1500 });
+      return;
+    }
+    //validate file extension
+    const nameParts = file2.name.split('.');
+    const ext = nameParts.pop();
+    if (!ext) {
+      toast.error('The file does not have an extension', { autoClose: 1500 });
+      return;
+    }
+
+    const fileExtension = `.${ext.toLowerCase()}`;
+    if (fileExtension !== ".pdf" && fileExtension !== ".zip") {
+      toast.error(`Incorrect file extension. Must be .pdf or .zip`, { autoClose: 1500 });
+      return;
+    }
+    const formData = new FormData();
+    formData.append('file', file2);
+    
+    const record = evidenceData.find(e => e._id === selectedEvidenceId);
+    if (record) {
+      // Add record data blockchain
+      const originalFilename = record.filePath.split('/').pop();
+      if (originalFilename) {
+        // Replace "case_number" with "technical_report"
+        const baseName = originalFilename.substring(0, originalFilename.lastIndexOf('.'));
+        const technicalReportBaseName = baseName.replace("case_number", "technical_report");
+        const technicalReportFilename = technicalReportBaseName + fileExtension;
+        formData.append('technicalReportFilename', technicalReportFilename);
+        console.log("filename:", technicalReportFilename);
+      } else {
+        toast.error("Error retrieving original filename", { autoClose: 1500 });
+        return;
+      }
+    } else {
+      toast.error("No record found for selected evidence", { autoClose: 1500 });
+      return;
+    }
+    console.log("formData antes de enviar file:", formData);
+    try {
+      const response = await fetch(`${API}/uploadTechnicalReport`,{
+        method: 'POST',
+        headers: {
+          "Authorization": `Bearer ${tokenAuth}`
+          },
+        body: formData,
+      });
+      
+      const data = await response.json();
+      if(!response.ok){
+        console.error('Error uploading file:', data.error);
+        toast.error('Error uploading file', { autoClose: 2000 });
+        return;
+      }
+
+      setFormData(prevState => ({// Update the filePath in the formData
+        ...prevState,        
+        fileTechnicalReport: data.file_path,
+      }));
+
+      console.log('Technical report successfully uploaded', data.file_path);
+      toast.success('Technical report successfully uploaded', { autoClose: 1500 });
+    } catch (error) {
+      console.error('Error requesting technical report upload', error);
+      toast.error('Error requesting technical report upload', { autoClose: 1500 });
+    }
+  };
+  //----------------------------------------
+  const uploadExecutiveReport = async (e) => {
+    e.preventDefault(); // Prevent the default form submission behavior
+  
+    if (!isConnected) {
+      toast.error("Please connect your wallet", { autoClose: 1500 });
+      return;
+    }
+    if (selectedEvidenceId === null) {
+      toast.error("No evidence selected", { autoClose: 1500 });
+      return;
+    }
+    if (!file3) {
+      toast.error('No file selected', { autoClose: 1500 });
+      return;
+    }
+    // Validate file extension
+    const nameParts = file3.name.split('.');
+    const ext = nameParts.pop();
+    if (!ext) {
+      toast.error('The file does not have an extension', { autoClose: 1500 });
+      return;
+    }
+  
+    const fileExtension = `.${ext.toLowerCase()}`;
+    if (fileExtension !== ".pdf" && fileExtension !== ".zip") {
+      toast.error(`Incorrect file extension. Must be .pdf or .zip`, { autoClose: 1500 });
+      return;
+    }
+    const formData = new FormData();
+    formData.append('file', file3);
+      
+    const record = evidenceData.find(e => e._id === selectedEvidenceId);
+    if (record) {
+      // Add record data from blockchain
+      const originalFilename = record.filePath.split('/').pop();
+      if (originalFilename) {
+        // Replace "case_number" with "executive_report"
+        const baseName = originalFilename.substring(0, originalFilename.lastIndexOf('.'));
+        const executiveReportBaseName = baseName.replace("case_number", "executive_report");
+        const executiveReportFilename = executiveReportBaseName + fileExtension;
+        formData.append('executiveReportFilename', executiveReportFilename);
+        console.log("filename:", executiveReportFilename);
+      } else {
+        toast.error("Error retrieving original filename", { autoClose: 1500 });
+        return;
+      }
+    } else {
+      toast.error("No record found for selected evidence", { autoClose: 1500 });
+      return;
+    }
+    console.log("formData before sending file:", formData);
+    try {
+      const response = await fetch(`${API}/uploadExecutiveReport`, {
+        method: 'POST',
+        headers: {
+          "Authorization": `Bearer ${tokenAuth}`
+        },
+        body: formData,
+      });
+        
+      const data = await response.json();
+      if (!response.ok) {
+        console.error('Error uploading file:', data.error);
+        toast.error('Error uploading file', { autoClose: 2000 });
+        return;
+      }
+  
+      setFormData(prevState => ({
+        ...prevState,        
+        fileExecutiveReport: data.file_path,
+      }));
+  
+      console.log('Executive report successfully uploaded', data.file_path);
+      toast.success('Executive report successfully uploaded', { autoClose: 1500 });
+    } catch (error) {
+      console.error('Error requesting executive report upload', error);
+      toast.error('Error requesting executive report upload', { autoClose: 1500 });
+    }
+  };
+//----------------------------------------
+  const uploadReports= async (e) => {
+    e.preventDefault(); 
+    //para registrar reporst en consola
+    if ( !formData2.fileTechnicalReport ) {
+      toast.error('Technical report not uploaded, select file and upload.', { autoClose: 1500 });
+      return;
+    }
+    if (!file2) {
+        toast.error('No file selected', { autoClose: 1500 });
+        return;
+    }
+    if ( !formData2.fileExecutiveReport ) {
+      toast.error('Executive report not uploaded, select file and upload.', { autoClose: 1500 });
+      return;
+    }
+    if (!file3) {
+        toast.error('No file selected', { autoClose: 1500 });
+        return;
+    }
+    console.log("prueba antes de cargar:", formData2);
+    toast.success('Files successfully uploaded', { autoClose: 2000 });
+    setShowEvidenceDataTable(false);
+    setShowBlockchainTable(true);
+    setShowFirstForm(false);
+    setShowUploadForm(false);
+  }
+  //----------------------------------------
+  const nextPhase2 = async () => {
     const newPhase = "Presentation"; 
     const newState = "Judicial Validation";
     const newStateUpdateDate = new Date().toLocaleString('es-ES', {
@@ -219,12 +559,12 @@ const {
     }
 
     try {
-      /* 
       const currentTxHash = await writeTx2({
         address: contractAddress_DE_deploy,
         abi,
-        functionName: "updatePhase",
-        args: [selectedEvidenceId, newPhase, newState, selectDate],
+        functionName: "updatePresentationPhase",
+        args: [selectedEvidenceId, newPhase, newState, selectDate, 
+          formData2.fileTechnicalReport, formData2.fileExecutiveReport],
       });
 
       if (!currentTxHash || !currentTxHash.startsWith("0x")) {
@@ -239,24 +579,28 @@ const {
       });
  
       toast.success("Phase updated successfully", { autoClose: 2000 });
-       */
-     const currentTxHash ="0x0";
+
+     //const currentTxHash ="0x0";
      console.log("Data form: ", formData2, selectDate);
-     handleUpdateDB(selectedEvidenceId, newPhase, newState, selectDate, currentTxHash);
-     await getEvidenceData(); //update table 1
+     handleUpdateDB2(selectedEvidenceId, newPhase, newState, selectDate, 
+      formData2.fileTechnicalReport, formData2.fileExecutiveReport, currentTxHash);
      clearForm();// clear box data form  
+     clearForm2();
+     await getEvidenceData(); //update table 1
     } catch (error) {
       console.error("Error updating phase:", error);
       toast.error("Error updating phase", { autoClose: 2000 });
     }
   };
   //----------------------------------------
-  const handleUpdateDB = async (_selectedEvidenceId: number,
-    _newPhase: string, _newState: string, _selectDate: string, _blockchainTxHash: string) => { 
+  const handleUpdateDB2 = async (_selectedEvidenceId: number,
+    _newPhase: string, _newState: string, _selectDate: string, 
+    _technicalReport: string, _executiveReport: string, 
+    _blockchainTxHash: string) => { 
     
     const nameUser = localStorage.getItem("user"); 
     try{  
-      const response = await fetch(`${API}/updateEvidence/${_selectedEvidenceId}`, { //submit data to server
+      const response = await fetch(`${API}/updateEvidence2/${_selectedEvidenceId}`, { //submit data to server
           method: 'PUT',
           headers: {
             "Authorization": `Bearer ${tokenAuth}`,
@@ -272,6 +616,8 @@ const {
             lastNames: formData2.lastNames,
             userType: formData2.userType,
             nameUser: nameUser,
+            technicalReport: _technicalReport,
+            executiveReport: _executiveReport,
             blockchainTxHash: _blockchainTxHash //hash of the transaction registered evidence in blockchain         
           })
         });
@@ -279,19 +625,28 @@ const {
         const data = await response.json();
         
         if(!response.ok){
-            throw new Error(`HTTP error! Status Register Evidence BD: ${response.status}`);
+            throw new Error(`HTTP error! Status Update Evidence BD: ${response.status}`);
         }
-        console.log("Success report data registered",data);
+        console.log("Success report data updated",data);
       
     }catch(error){
         console.error('Error:',error);
     }
   };
   //----------------------------------------
+  const handleShowUploadForm= (e) => {
+    e.preventDefault();
+    setShowEvidenceDataTable(false);
+    setShowBlockchainTable(false);
+    setShowFirstForm(false);
+    setShowUploadForm(true);
+  };
+  //----------------------------------------
   const handleNextPhaseButton = (e) => {
     e.preventDefault();
-    if( !formData2.userId || !formData2.names || !formData2.lastNames || !formData2.userType){
-      toast.error('Please, fill all the fields', { autoClose: 1000 });
+    if( !formData2.userId || !formData2.names || !formData2.lastNames || 
+      !formData2.userType){
+      toast.error('Please, fill all the fields', { autoClose: 1500 });
       return;  
     }
     setFormData(prevState => ({
@@ -307,34 +662,55 @@ const {
   const confirmNextPhase = async (e) => {
     e.preventDefault();
     setNextPhaseConfirmOpen(false);
-    await nextPhase(); // Call update data blockchain
-
-    setShowEvidenceDataTable(true);
+    await nextPhase2(); // Call update2 data blockchain
+    await getEvidenceData(); //update table 1
+    
     setShowBlockchainTable(false);
     setShowFirstForm(false);
-
+    setShowUploadForm(false);
+    setShowEvidenceDataTable(true);
   };
-  const handlePhaseForm = () => {
+  const handlePhaseForm2 = () => {
     if (!isConnected) {
       toast.error("Please connect your wallet", { autoClose: 2000 });
       return;
     }
+    if (
+      formData2.fileTechnicalReport === "" ||
+      formData2.fileExecutiveReport === ""
+    ) {
+      toast.error("Please upload the reports before proceeding", { autoClose: 2000 });
+      return;
+    }
+
     setShowEvidenceDataTable(false);
     setShowBlockchainTable(false);
     setShowFirstForm(true);
+    setShowUploadForm(false);
   }
-  //----------------------------------------
+//----------------------------------------
   const handleBack = () => { 
+    clearForm2();
     setShowBlockchainTable(false);
     setShowEvidenceDataTable(true);
     setShowFirstForm(false);
+    setShowUploadForm(false);
   };
   //----------------------------------------
   const handleBack2 = () => { 
     setShowBlockchainTable(true);
     setShowEvidenceDataTable(false);
     setShowFirstForm(false);
+    setShowUploadForm(false);
     clearForm();
+  };
+  const handleBack3 = () => { 
+    setShowBlockchainTable(true);
+    setShowEvidenceDataTable(false);
+    setShowFirstForm(false);
+    setShowUploadForm(false);
+    clearForm2();
+    console.log("Back 3 clear: ", formData2);
   };
   //-------------------------------------
   useEffect(() => { //get token authentication
@@ -365,7 +741,7 @@ return (
             <h2 className="text-2xl font-semibold text-white text-center">
               Phase 4. Analysis</h2><br/>
               <h3 className='text-center text-gray-400 text-lg '>
-              Identification, classification and collection of digital evidence for forensic investigation.</h3>
+              Preserved digital evidence is examined to extract information relevant to the forensic case.</h3>
           </div>
           <div className="mb-4">     
           </div>
@@ -386,7 +762,7 @@ return (
     <div className="w-[80%] flex flex-col justify-start items-center bg-[#010f1f] text-white p-1 mt-3">
     
     {showEvidenceDataTable && ( 
-      <div className="w-full max-w-[90%] mx-auto mt-4">
+      <div className="w-full max-w-[90%] mx-auto mt-1">
         <h1 className='text-xl text-white font-bold text-center flex-col'>
         List of registered evidences  </h1>    
         <div className="flex justify-left">
@@ -412,7 +788,7 @@ return (
                 </th>
                 {["Evidence Id", "Case Number", "Phase", "State", "Tx Date", "Evidence Type",
                   "File Path", "Hash Evidence", "Method Adquisition", "Note Evidence", 
-                  "Location", "Device", "User Id", "User Name", "User Type","Action"
+                  "Location", "Device", "User Id", "User Name", "User Type"
                   ].map((header, index) => (
                     <th
                       key={index}
@@ -495,16 +871,6 @@ return (
                     <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-800">
                       {dataE.userType}
                     </td>
-                    {[...Array(1)].map((_, i) => (
-                      <td key={i} className="px-3 py-4 whitespace-nowrap text-end text-sm font-medium">
-                        <button
-                          type="button"
-                          className="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 focus:outline-none focus:text-blue-800 disabled:opacity-50 disabled:pointer-events-none"
-                        >
-                          Verify
-                        </button>
-                      </td>
-                    ))}
                   </tr>
                 ))
                 ) : (
@@ -528,7 +894,7 @@ return (
           {Array.isArray(blockchainEvidence) &&
             blockchainEvidence.length > 0 ? (
 
-            <div className="w-full max-w-[80%]  mx-auto mt-6">
+            <div className="w-full max-w-[80%]  mx-auto mt-1">
               <h2 className="text-xl font-bold text-white text-center mb-4">
               ID {"["+selectedEvidenceId+"]"} : Evidence status recorded in blockchain 
               </h2>
@@ -546,7 +912,7 @@ return (
                   Download Evidence
                 </button>
                 <button 
-                    onClick={handlePhaseForm}
+                    onClick={handlePhaseForm2}
                     type="button" 
                     className="rounded-md bg-primary-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={
@@ -555,11 +921,11 @@ return (
                         Array.isArray(blockchainEvidence) &&
                         blockchainEvidence.length >= 3 &&
                         blockchainEvidence[2] &&
-                        blockchainEvidence[2].phase === "preservation"
+                        blockchainEvidence[2].phase === "Analysis" 
                       )
                     }
                   >
-                  Analysis Phase
+                  Presentation Phase
                 </button>
               </div>
               <div className="inline-block min-w-full py-2">
@@ -595,6 +961,57 @@ return (
                 </div>
               </div>
 
+              <div className="flex justify-end  gap-4">
+                <button
+                  onClick={handleDownloadTechnical}
+                  type="button" 
+                  disabled={
+                    (
+                      blockchainEvidence &&
+                      Array.isArray(blockchainEvidence) &&
+                      blockchainEvidence.length >= 3 &&
+                      blockchainEvidence[2] &&
+                      blockchainEvidence[2].technicalReport=== "noFileTechnical" 
+                    )
+                  }
+                  className="rounded-md bg-primary-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                  Download Technical Report
+                </button>
+                <button
+                  onClick={handleDownloadExecutive}
+                  type="button" 
+                  disabled={
+                    (
+                      blockchainEvidence &&
+                      Array.isArray(blockchainEvidence) &&
+                      blockchainEvidence.length >= 3 &&
+                      blockchainEvidence[2] &&
+                      blockchainEvidence[2].executiveReport=== "noFileExecutive" 
+                    )
+                  }
+                  className="rounded-md bg-primary-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                  Download Executive Report
+                </button>
+                <button
+                  onClick={handleShowUploadForm}
+                  type="button" 
+                  disabled={
+                    !(
+                      blockchainEvidence &&
+                      Array.isArray(blockchainEvidence) &&
+                      blockchainEvidence.length >= 3 &&
+                      blockchainEvidence[2] &&
+                      blockchainEvidence[2].phase=== "Analysis" 
+                    )
+                  }
+                  className="rounded-md bg-primary-600 px-3 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Upload Reports
+                </button>
+              </div>
+
               {(() => {
                 const record = evidenceData.find(e => e._id === selectedEvidenceId);
                 if (record && record.transactions && record.transactions.length > 0) {
@@ -614,6 +1031,9 @@ return (
                                 <th className="px-3 py-3 text-start text-base font-medium uppercase">
                                 Description Data
                                 </th>
+                                <th className="px-3 py-3 text-start text-base font-medium uppercase">
+                                  Action
+                                </th>
                               </tr>
                             </thead>
                             <tbody>
@@ -628,6 +1048,14 @@ return (
                                         <strong>{key}:</strong> {String(value)}
                                       </div>
                                     ))}
+                                  </td>
+                                  <td className="px-3 py-4 whitespace-nowrap text-end text-sm font-medium">
+                                    <button
+                                      type="button"
+                                      className="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 focus:outline-none focus:text-blue-800 disabled:opacity-50 disabled:pointer-events-none"
+                                    >
+                                      Verify
+                                    </button>
                                   </td>
                                 </tr>
                               ))}
@@ -657,7 +1085,7 @@ return (
       <form className="w-[60%] bg-gray-50 rounded-7 px-8 p-6 pb-3 mt-10" id="form2">
           <div className="form-group border-b border-gray-300 pb-7 pt-7">
               <h2 className="text-center text-2xl font-semibold text-lg text-gray-700">
-                Information responsible for the phase change</h2>      
+              Information responsible for the change from phase to presentation</h2>      
             </div>
 
               <div className="form-group border-b border-gray-300 pb-4">
@@ -770,9 +1198,125 @@ return (
               className="bg-primary-600 text-white hover:bg-primary-700 focus-visible:outline-indigo-600
               rounded-md px-3 py-2 text-sm-md font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               onClick={handleNextPhaseButton}
-              
             >
               Next Phase   
+            </button>
+          </div>
+      </form>
+      )}
+{/*----------------------*/}
+      {showUploadForm && (
+      <form className="w-[60%] bg-gray-50 rounded-7 px-8 p-6 pb-3 mt-4" id="form2">
+          <div className="form-group border-b border-gray-300 pb-3 pt-2">
+              <h2 className="text-center text-2xl font-semibold text-lg text-gray-700">
+              Upload of technical and executive reports of forensic analysis performed on digital evidence</h2>      
+          </div>
+
+          <label htmlFor="fileType" className="text-2xl font-semibold text-lg text-gray-700">
+            Technical report
+          </label>
+          <div className="col-span-full border-b border-gray-300 pb-3">
+            <label htmlFor="fileType" className="text-1xl  text-lg text-gray-700">
+              Select file
+            </label>
+            <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-500 px-6 py-3 ">
+              <div className="text-center">
+                {fileName2 ? (
+                    <span className="text-lg text-gray-700">{fileName2}</span>  // Show the selected file name
+                  ) : (
+                    <FcDocument aria-hidden="true" className="mx-auto size-14 text-gray-500"/>
+                )}
+
+                <div className="flex flex-col items-center justify-center">
+                  <label
+                    htmlFor="file-upload"
+                    className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                  >
+                    <span> Select a file</span>
+                    <input id="file-upload" 
+                          name="file" 
+                          type="file" 
+                          accept=".pdf,.zip"
+                          className="sr-only"
+                          onChange={handleFileChange2}
+                    />      
+                  </label>
+                </div>
+                <p className="text-xs/4 text-gray-600">  PDF or ZIP</p>
+              </div>
+            </div> 
+        
+            <div className="mt-6 flex items-center justify-end gap-x-3">
+              <button
+                type="submit"
+                onClick={uploadTechnicalReport}  
+                className="rounded-md bg-primary-600 px-2 py-1 text-sm font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                Upload Report 1
+              </button>
+            </div>
+          </div> 
+          
+          <label htmlFor="fileType2" className="text-2xl font-semibold text-lg text-gray-700">
+            Executive report
+          </label>
+          <div className="col-span-full">
+            <label htmlFor="fileType2" className="text-1xl  text-lg text-gray-700">
+              Select file
+            </label>
+            <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-300 px-6 py-3 ">
+              <div className="text-center">
+                {fileName3 ? (
+                    <span className="text-lg text-gray-700">{fileName3}</span>  // Show the selected file name
+                  ) : (
+                    <FcDocument aria-hidden="true" className="mx-auto size-14 text-gray-300"/>
+                )}
+
+                <div className="flex flex-col items-center justify-center">
+                  <label
+                    htmlFor="file-upload2"
+                    className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                  >
+                    <span> Select a file</span>
+                    <input id="file-upload2" 
+                          name="file" 
+                          type="file" 
+                          accept=".pdf,.zip"
+                          className="sr-only"
+                          onChange={handleFileChange3}
+                    />      
+                  </label>
+                </div>
+                <p className="text-xs/4 text-gray-600">  PDF or ZIP</p>
+              </div>
+            </div> 
+        
+            <div className="mt-6 flex items-center justify-end gap-x-3">
+              <button
+                type="submit"
+                onClick={uploadExecutiveReport}  
+                className="rounded-md bg-primary-600 px-2 py-1 text-sm font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                Upload Report 2
+              </button>
+            </div>
+          </div> 
+          
+          <div className="mt-6 flex items-center justify-center gap-x-6">
+            <button 
+              type="button" 
+              onClick={handleBack3}
+              className="rounded-md bg-red-500 px-4 py-1 text-sm-md font-semibold text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Back
+            </button>  
+            <button
+              type="submit"
+              className="bg-primary-600 text-white hover:bg-primary-700 focus-visible:outline-indigo-600
+              rounded-md px-3 py-1 text-sm-md font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              onClick={uploadReports}
+            >
+              Upload
             </button>
           </div>
       </form>
@@ -839,7 +1383,117 @@ return (
       </div>
     </Dialog>
 
-  {/* --- Next Phase Modal */}
+{/* --- Download Technical Report Modal */}
+  <Dialog
+      open={confirmDownloadTechnical}
+      onClose={() => setDownloadTechnical(false)}
+      className="relative z-10"
+    >
+      <DialogBackdrop
+        transition
+        className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+      />
+      <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <DialogPanel
+            transition
+            className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+          >
+            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="sm:flex sm:items-start">
+                <div className="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <InformationCircleIcon aria-hidden="true" className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                  <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
+                    Download Technical Report
+                  </DialogTitle>
+                  <div className="mt-2">
+                    <p className="text-lg text-gray-500">
+                    Are you sure you want to download the technical report?
+                      <br />
+                      Click on confirm.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:space-x-4 sm:space-x-reverse sm:px-6 justify-center items-center">
+              <button
+                type="button"
+                onClick={confirmDownload2}
+                className="bg-primary-600 text-white hover:bg-primary-700 rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                Confirm
+              </button>
+              <button
+                type="button"
+                onClick={() => setDownloadTechnical(false)}
+                className="rounded-md bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                Cancel
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
+      </div>
+    </Dialog>
+{/* --- Download Technical Report Modal */}
+    <Dialog
+      open={confirmDownloadExecutive}
+      onClose={() => setDownloadExecutive(false)}
+      className="relative z-10"
+    >
+      <DialogBackdrop
+        transition
+        className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+      />
+      <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <DialogPanel
+            transition
+            className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+          >
+            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="sm:flex sm:items-start">
+                <div className="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <InformationCircleIcon aria-hidden="true" className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                  <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
+                    Download Executive Report
+                  </DialogTitle>
+                  <div className="mt-2">
+                    <p className="text-lg text-gray-500">
+                    Are you sure you want to download the executive report?
+                      <br />
+                      Click on confirm.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:space-x-4 sm:space-x-reverse sm:px-6 justify-center items-center">
+              <button
+                type="button"
+                onClick={confirmDownload3}
+                className="bg-primary-600 text-white hover:bg-primary-700 rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                Confirm
+              </button>
+              <button
+                type="button"
+                onClick={() => setDownloadTechnical(false)}
+                className="rounded-md bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                Cancel
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
+      </div>
+  </Dialog>
+{/* --- Next Phase Modal */}
     <Dialog
       open={nextPhaseConfirmOpen}
       onClose={() => setNextPhaseConfirmOpen(false)}
@@ -866,7 +1520,7 @@ return (
                   </DialogTitle>
                   <div className="mt-2">
                     <p className="text-lg text-gray-500">
-                    Do you want to shift digital evidence to the Analysis Phase?
+                    Do you want to shift digital evidence to the Presentation Phase?
                       <br />
                       Click on confirm.
                     </p>

@@ -109,31 +109,40 @@ return (
   </div>
 </div>   
   {/* ------- Section right 111827 bg-gray-950*/}
-    <div className="w-1/2 flex flex-col justify-start items-center bg-[#111827] text-white p-1 mt-20">
+  <div className="w-1/2 flex flex-col justify-start items-center bg-[#111827] text-white p-1 mt-20">
+    {!tokenAuth ? (
       <LoginForm onLogin={handleAuthenticateUser} />
-      {tokenAuth ? (
-        <>
-          <div className="mt-8">
-            <ConnectButton />
-          </div>
-          <div>
-            {isConnected ? (
-              <div className="my-5 px-4 items-center text-center">
-                  <span> Wallet Address: </span>
-                  <p className="text-red-500">{isLoadingContract ? (<span className="opacity-70 text-white">Loading..."</span>) : address}</p>
-              </div>
-            ) : (
-              <div className="text-1xl text-red-500 text-center flex-col">
-                Connect your metamask wallet
-              </div>
-            )}
-          </div>
-        </>
-      ) : (
-        <h2 className="text-xl font-bold text-center text-red-500">Login to your account</h2>
-      )}
-    </div>
-  </main>
+    ) : (
+      <>
+      {/* Connect button for Metamask wallet */}
+      <div className="flex flex-col items-center justify-center min-h-[60%]">
+        <div className="mt-8">
+          <ConnectButton />
+        </div>
+
+        <div>
+          {isConnected ? (
+            <div className="my-5 px-4 items-center text-center">
+              <span> Wallet Address: </span>
+              <p className="text-red-500">
+                {isLoadingContract ? (
+                  <span className="opacity-70 text-white">Loading...</span>
+                ) : (
+                  address
+                )}
+              </p>
+            </div>
+          ) : (
+            <div className="text-1xl text-red-500 text-center flex-col">
+              Connect your Metamask Wallet
+            </div>
+          )}
+        </div>
+      </div>
+      </>
+    )}
+  </div>
+</main>
 </>
 );
  

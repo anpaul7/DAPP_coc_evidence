@@ -95,18 +95,18 @@ function Identification () {
     e.preventDefault(); // Prevent the default form submission behavior
 
     if (!isConnected) {
-      toast.error("Please connect your wallet", { autoClose: 2000 });
+      toast.error("Please connect your wallet", { autoClose: 1500 });
       return;
     }
 
     if (!file) {
-      toast.error('No file selected', { autoClose: 1000 });
+      toast.error('No file selected', { autoClose: 1500 });
       return;
     }
     if ( !formData2.caseNumber || !formData2.location ||
       !formData2.device || !formData2.evidenceType ) {
-      toast.error('Please, fill all the fields', { autoClose: 1000 });
-      return
+      toast.error('Please, fill all the fields', { autoClose: 1500 });
+      return;
     }
     //validate file extension
     const nameParts = file.name.split('.');
@@ -303,8 +303,8 @@ function Identification () {
           parseInt(formData2.userId), formData2.names, 
           formData2.lastNames, formData2.userType
         ],
-        ["preservation","custody",formData2.registrationDate,
-          "noFileTecnical","noFileExecutive"
+        ["Preservation","Custody",formData2.registrationDate,
+          "noFileTechnical","noFileExecutive"
         ]
       ];
 
@@ -397,8 +397,8 @@ function Identification () {
             phase: 'Preservation',
             state: 'Custody',
             stateUpdateDate: 'noStateDate',
-            technicalReport: 'noFile',
-            executiveReport: 'noFile',
+            technicalReport: 'noFileTechnical',
+            executiveReport: 'noFileExecutive',
             nameUser: nameUser,
             
             blockchainTxHash: _blockchainTxHash //hash of the transaction registered evidence in blockchain         
@@ -490,10 +490,10 @@ return (
     {/* Section line */}
     <div className="w-[3px] bg-gray-800 shadow-2xl shadow-black/50 "></div>
     {/* Section right   */}
-    <div className="w-[80%] flex flex-col justify-start items-center bg-[#010f1f] text-white p-1 mt-20">
+    <div className="w-[80%] flex flex-col justify-start items-center bg-[#010f1f] text-white p-1 mt-4">
        
         {showFirstForm && (
-        <form className="w-[60%] bg-gray-50 rounded-7 px-8 p-5 pb-10" id="form0">    
+        <form className="w-[60%] bg-gray-50 rounded-7 px-8 p-5 pb-5" id="form0">    
               
               <div className="form-group border-b border-gray-300 pb-7">
                 <h2 className="text-center text-2xl font-semibold text-lg text-gray-700">
@@ -622,7 +622,7 @@ return (
               <label htmlFor="fileType" className="text-2xl font-semibold text-lg text-gray-700">
                 Select file
               </label>
-              <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-300 px-6 py-3 ">
+              <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-500 px-6 py-3 ">
                 <div className="text-center">
                   {fileName ? (
                       <span className="text-lg text-gray-700">{fileName}</span>  // Show the selected file name

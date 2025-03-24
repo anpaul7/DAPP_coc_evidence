@@ -148,11 +148,101 @@ def upload_file():
         print(f"Error in upload_file: {str(e)}")
         return jsonify({"Error": "Internal Server Error", "Details": str(e)}), 500
 
-#---------------------------------------------------
+#----------------- upload technical report
+@app.route('/uploadTechnicalReport', methods=['POST'])
+@jwt_required() # Protected route and JWT autentication
+def upload_technicalReport():
+    try:
+        if 'file' not in request.files:
+            return jsonify({"Error": "No file sent"}), 400
 
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"Error": "No selected file"}), 401
+
+        technicalReport = request.form.get('technicalReportFilename')
+        print(f"technicalReportFilename: {technicalReport}")
+        
+        if not technicalReport:
+            return jsonify({"Error": "No technicalReportFilename provided"}), 401
+        
+        # Save the file in 'uploads'
+        upload_folder = os.getenv('UPLOAD_FOLDER', 'uploads')
+        save_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), upload_folder)
+        os.makedirs(save_directory, exist_ok=True)
+
+        save_path = os.path.join(save_directory, technicalReport)
+        file.save(save_path)
+
+        relative_file_path = os.path.join("src", upload_folder, technicalReport)
+        
+        return jsonify({"message": " Technical report uploaded successfully", 
+                        "file_path": relative_file_path,
+        }), 201
+
+    except Exception as e:
+        print(f"Error in upload_technicalReport: {str(e)}")
+        return jsonify({"Error": "Internal Server Error", "Details": str(e)}), 500
+
+#---------------------------------------------------
+@app.route('/uploadExecutiveReport', methods=['POST'])
+@jwt_required()  # Protected route and JWT authentication
+def upload_executiveReport():
+    try:
+        if 'file' not in request.files:
+            return jsonify({"Error": "No file sent"}), 400
+
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"Error": "No selected file"}), 401
+
+        executiveReport = request.form.get('executiveReportFilename')
+        print(f"executiveReportFilename: {executiveReport}")
+        
+        if not executiveReport:
+            return jsonify({"Error": "No executiveReportFilename provided"}), 401
+        
+        # Save the file in 'uploads'
+        upload_folder = os.getenv('UPLOAD_FOLDER', 'uploads')
+        save_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), upload_folder)
+        os.makedirs(save_directory, exist_ok=True)
+
+        save_path = os.path.join(save_directory, executiveReport)
+        file.save(save_path)
+
+        relative_file_path = os.path.join("src", upload_folder, executiveReport)
+        
+        return jsonify({
+            "message": "Executive report uploaded successfully", 
+            "file_path": relative_file_path,
+        }), 201
+
+    except Exception as e:
+        print(f"Error in upload_executiveReport: {str(e)}")
+        return jsonify({"Error": "Internal Server Error", "Details": str(e)}), 500
+
+#---------------------------------------------------
 @app.route('/download/<path:filename>', methods=['GET'])
 @jwt_required() 
 def download_file(filename):
+    full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    print(f"Filename: {filename}")
+    print(f"Full file path: {full_path}")
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True) 
+
+#---------------------------------------------------
+@app.route('/download2/<path:filename>', methods=['GET'])
+@jwt_required() 
+def download_file2(filename):
+    full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    print(f"Filename: {filename}")
+    print(f"Full file path: {full_path}")
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True) 
+
+#---------------------------------------------------
+@app.route('/download3/<path:filename>', methods=['GET'])
+@jwt_required() 
+def download_file3(filename):
     full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     print(f"Filename: {filename}")
     print(f"Full file path: {full_path}")
@@ -234,8 +324,8 @@ def registerEvidence():
             {   
                 'txId': 0,
                 'blockchainTxHash': data.get('blockchainTxHash'),
-                'phase': 'preservation',
-                'state': 'custody',
+                'phase': 'Preservation',
+                'state': 'Custody',
                 'txDate': data.get('registrationDate'), 
                 'userId': data.get('userId'),
                 'names': data.get('names'),
@@ -255,7 +345,7 @@ def registerEvidence():
     }
     return jsonify(response_data),201
 
-#------------- insert evidence in db
+#------------- update evidence in db
 @app.route('/updateEvidence/<int:id>', methods=['PUT']) 
 @jwt_required() # Protected route and JWT autentication
 def updateEvidence(id):
@@ -307,18 +397,61 @@ def updateEvidence(id):
     else:
         return jsonify({"error": "Evidence not found or no changes made"}), 404
 
-    '''
-    "userId": data.get("userId"),
+#------------- update evidence2 in db
+@app.route('/updateEvidence2/<int:id>', methods=['PUT']) 
+@jwt_required() # Protected route and JWT autentication
+def updateEvidence2(id):
+
+    data = request.get_json() #get data from json
+
+    if not data.get('id'):
+        return jsonify({"error": "The 'id' field isn't present"}), 400
+    
+    if int(data.get('id')) != id:
+        return jsonify({"error": "The id in the URL and in the JSON do not match"}), 400
+    
+    existing_data = collection.find_one({ "_id": int(data['id'])})
+    if not existing_data:
+        return jsonify({"error": "The 'id' not exists"}), 400
+
+    update_fields = {
+        "phase": data.get("phase"),
+        "state": data.get("state"),
+        "stateUpdateDate": data.get("stateUpdateDate"),
+        "technicalReport": data.get("technicalReport"),
+        "executiveReport": data.get("executiveReport")
+    }
+    update_fields = {k: v for k, v in update_fields.items() if v is not None}
+
+    new_transaction = {
+        "txId": len(existing_data.get("transactions", [])),
+        "blockchainTxHash": data.get("blockchainTxHash"),
+        "phase": data.get("phase"),
+        "state": data.get("state"),
+        "txDate": data.get("stateUpdateDate"),
+        "userId": data.get("userId"),
         "names": data.get("names"),
         "lastNames": data.get("lastNames"),
         "userType": data.get("userType"),
-        "nameUser": data.get("nameUser"),
-        "blockchainTxHash": data.get("blockchainTxHash")
-        "phase": data.get("phase"),
-        "state": data.get("state"),
-        "stateUpdateDate": data.get("stateUpdateDate"),   
-    '''
-   
+        "nameUser": data.get("nameUser")
+    }
+
+    result = collection.update_one(
+        {"_id": int(data['id'])},
+        {
+            "$set": update_fields, # Update the specified fields
+            "$push": {"transactions": new_transaction} # Add the new transaction
+        }
+    )
+
+    if result.modified_count == 1:
+        response_data = {"msg": "Evidence updated successfully"}
+        print(f"Response data: {response_data}")
+        return jsonify(response_data), 200
+    else:
+        return jsonify({"error": "Evidence not found or no changes made"}), 404
+ 
+ 
 
 #------------- verify evidence in blockchain db
 @app.route('/verify', methods=['POST']) #verify evidence in db

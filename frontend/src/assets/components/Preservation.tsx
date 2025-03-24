@@ -366,7 +366,7 @@ return (
             <h2 className="text-2xl font-semibold text-white text-center">
               Phase 3. Preservation</h2><br/>
               <h3 className='text-center text-gray-400 text-lg '>
-              Identification, classification and collection of digital evidence for forensic investigation.</h3>
+              Securely store, maintain and preserve digital evidence in the exact condition in which it was acquired.</h3>
           </div>
           <div className="mb-4">     
           </div>
@@ -387,7 +387,7 @@ return (
     <div className="w-[80%] flex flex-col justify-start items-center bg-[#010f1f] text-white p-1 mt-3">
     
     {showEvidenceDataTable && ( 
-      <div className="w-full max-w-[90%] mx-auto mt-4">
+      <div className="w-full max-w-[90%] mx-auto mt-1">
         <h1 className='text-xl text-white font-bold text-center flex-col'>
         List of registered evidences  </h1>    
         <div className="flex justify-left">
@@ -529,7 +529,7 @@ return (
           {Array.isArray(blockchainEvidence) &&
             blockchainEvidence.length > 0 ? (
 
-            <div className="w-full max-w-[80%]  mx-auto mt-6">
+            <div className="w-full max-w-[80%]  mx-auto mt-1">
               <h2 className="text-xl font-bold text-white text-center mb-4">
               ID {"["+selectedEvidenceId+"]"} : Evidence status recorded in blockchain 
               </h2>
@@ -556,7 +556,7 @@ return (
                         Array.isArray(blockchainEvidence) &&
                         blockchainEvidence.length >= 3 &&
                         blockchainEvidence[2] &&
-                        blockchainEvidence[2].phase === "preservation"
+                        blockchainEvidence[2].phase === "Preservation"
                       )
                     }
                   >
@@ -658,7 +658,7 @@ return (
       <form className="w-[60%] bg-gray-50 rounded-7 px-8 p-6 pb-3 mt-10" id="form2">
           <div className="form-group border-b border-gray-300 pb-7 pt-7">
               <h2 className="text-center text-2xl font-semibold text-lg text-gray-700">
-                Information responsible for the phase change</h2>      
+              Information responsible for the change from phase to Analysis</h2>      
             </div>
 
               <div className="form-group border-b border-gray-300 pb-4">
