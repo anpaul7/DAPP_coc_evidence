@@ -750,7 +750,9 @@ return (
                     <option value="" disabled >Select a user type</option>
                     <option value="Forensic Expert">Forensic Expert</option>
                     <option value="Forensic Investigator">Forensic Investigator</option>
-                    <option value="Police Officer">Police Officer</option>                  
+                    <option value="Police Officer">Police Officer</option>
+                    <option value="Prosecutor">Prosecutor</option> 
+                    <option value="Judge">Judge</option>                  
                   </select>
                   <ChevronDownIcon
                     aria-hidden="true"

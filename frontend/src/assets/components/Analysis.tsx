@@ -36,8 +36,6 @@ interface EvidenceData {
 }
 
 function Analysis() {
-
-
   const [tokenAuth, setTokenAuth] = useState('');//authentication token 
   const { isConnected } = useAccount(); //conect to wallet
   const {writeContractAsync: writeTx2} = useWriteContract(); //hub wagmi write in contract
@@ -57,8 +55,6 @@ function Analysis() {
   const [downloadConfirmOpen, setDownloadConfirmOpen] = useState(false);
   const [confirmDownloadTechnical, setDownloadTechnical] = useState(false);
   const [confirmDownloadExecutive, setDownloadExecutive] = useState(false);
-
-
   const [nextPhaseConfirmOpen, setNextPhaseConfirmOpen] = useState(false);
 //----------------------------------------
   const [formData2, setFormData] = useState({
@@ -201,7 +197,6 @@ const {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         const filename = record.filePath.split('/').pop() || 'download';
-        //console.log("file2:", filename);
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
@@ -227,14 +222,14 @@ const {
       
       const token = localStorage.getItem('authToken');
       const fileTechnicalReport = blockchainEvidence[2].technicalReport;
-      const filename = fileTechnicalReport.includes('/')
+      const technicalFilename = fileTechnicalReport.includes('/')
         ? fileTechnicalReport.split('/').pop()
         : fileTechnicalReport;
-
-      const fileUrl = `${API}/download2/${filename}`;
+      
+      console.log("Technical report filename:", technicalFilename);
+      const fileUrl = `${API}/download2/${technicalFilename}`;
       const encodedUrl = encodeURI(fileUrl);
       console.log("Download URL:", encodedUrl);
-      console.log("file:", encodedUrl);
       try {
         const response = await fetch(encodedUrl, {
           headers: {
@@ -243,16 +238,16 @@ const {
         });
         if (!response.ok) {
           const errorText = await response.text();
-          console.error("Download failed:: ", response.status, errorText);
+          console.error("Download failed:", response.status, errorText);
           throw new Error('Download failed');
         }
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        const filename = record.filePath.split('/').pop() || 'download2';
-        console.log("file2:", filename);
+
+        console.log("Final filename to download:", technicalFilename);
         a.href = url;
-        a.download = filename;
+        a.download = technicalFilename || 'download2';
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -276,14 +271,14 @@ const downloadExecutive = async () => {
       
       const token = localStorage.getItem('authToken');
       const fileExecutiveReport = blockchainEvidence[2].executiveReport;
-      const filename = fileExecutiveReport.includes('/')
+      const execFilename = fileExecutiveReport.includes('/')
         ? fileExecutiveReport.split('/').pop()
         : fileExecutiveReport;
-
-      const fileUrl = `${API}/download3/${filename}`;
+      
+      console.log("Executive report filename:", execFilename);
+      const fileUrl = `${API}/download3/${execFilename}`;
       const encodedUrl = encodeURI(fileUrl);
       console.log("Download URL:", encodedUrl);
-      console.log("file:", encodedUrl);
       try {
         const response = await fetch(encodedUrl, {
           headers: {
@@ -292,16 +287,16 @@ const downloadExecutive = async () => {
         });
         if (!response.ok) {
           const errorText = await response.text();
-          console.error("Download failed:: ", response.status, errorText);
+          console.error("Download failed:", response.status, errorText);
           throw new Error('Download failed');
         }
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        const filename = record.filePath.split('/').pop() || 'download3';
-        console.log("file2:", filename);
+
+        console.log("Final filename to download:", execFilename);
         a.href = url;
-        a.download = filename;
+        a.download = execFilename || 'download3';
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -330,11 +325,11 @@ const downloadExecutive = async () => {
     await downloadEvidence();
   };
   const confirmDownload2 = async () => {
-    setDownloadConfirmOpen(false);
+    setDownloadTechnical(false);
     await downloadTechnical();
   };
   const confirmDownload3 = async () => {
-    setDownloadConfirmOpen(false);
+    setDownloadExecutive(false);
     await downloadExecutive();
   };
   //----------------------------------------
@@ -364,24 +359,24 @@ const downloadExecutive = async () => {
       return;
     }
     if (selectedEvidenceId === null) {
-      toast.error("No evidence selected", { autoClose: 1500 });
+      toast.error("No evidence selected", { autoClose: 2000 });
       return;
     }
     if (!file2) {
-      toast.error('No file selected', { autoClose: 1500 });
+      toast.error('No file selected', { autoClose: 2000 });
       return;
     }
     //validate file extension
     const nameParts = file2.name.split('.');
     const ext = nameParts.pop();
     if (!ext) {
-      toast.error('The file does not have an extension', { autoClose: 1500 });
+      toast.error('The file does not have an extension', { autoClose: 2000 });
       return;
     }
 
     const fileExtension = `.${ext.toLowerCase()}`;
     if (fileExtension !== ".pdf" && fileExtension !== ".zip") {
-      toast.error(`Incorrect file extension. Must be .pdf or .zip`, { autoClose: 1500 });
+      toast.error(`Incorrect file extension. Must be .pdf or .zip`, { autoClose: 2000 });
       return;
     }
     const formData = new FormData();
@@ -399,11 +394,11 @@ const downloadExecutive = async () => {
         formData.append('technicalReportFilename', technicalReportFilename);
         console.log("filename:", technicalReportFilename);
       } else {
-        toast.error("Error retrieving original filename", { autoClose: 1500 });
+        toast.error("Error retrieving original filename", { autoClose: 2000 });
         return;
       }
     } else {
-      toast.error("No record found for selected evidence", { autoClose: 1500 });
+      toast.error("No record found for selected evidence", { autoClose: 2000 });
       return;
     }
     console.log("formData antes de enviar file:", formData);
@@ -429,10 +424,10 @@ const downloadExecutive = async () => {
       }));
 
       console.log('Technical report successfully uploaded', data.file_path);
-      toast.success('Technical report successfully uploaded', { autoClose: 1500 });
+      toast.success('Technical report successfully uploaded', { autoClose: 2000 });
     } catch (error) {
       console.error('Error requesting technical report upload', error);
-      toast.error('Error requesting technical report upload', { autoClose: 1500 });
+      toast.error('Error requesting technical report upload', { autoClose: 2000 });
     }
   };
   //----------------------------------------
@@ -440,28 +435,28 @@ const downloadExecutive = async () => {
     e.preventDefault(); // Prevent the default form submission behavior
   
     if (!isConnected) {
-      toast.error("Please connect your wallet", { autoClose: 1500 });
+      toast.error("Please connect your wallet", { autoClose: 2000 });
       return;
     }
     if (selectedEvidenceId === null) {
-      toast.error("No evidence selected", { autoClose: 1500 });
+      toast.error("No evidence selected", { autoClose: 2000 });
       return;
     }
     if (!file3) {
-      toast.error('No file selected', { autoClose: 1500 });
+      toast.error('No file selected', { autoClose: 2000 });
       return;
     }
     // Validate file extension
     const nameParts = file3.name.split('.');
     const ext = nameParts.pop();
     if (!ext) {
-      toast.error('The file does not have an extension', { autoClose: 1500 });
+      toast.error('The file does not have an extension', { autoClose: 2000 });
       return;
     }
   
     const fileExtension = `.${ext.toLowerCase()}`;
     if (fileExtension !== ".pdf" && fileExtension !== ".zip") {
-      toast.error(`Incorrect file extension. Must be .pdf or .zip`, { autoClose: 1500 });
+      toast.error(`Incorrect file extension. Must be .pdf or .zip`, { autoClose: 2000 });
       return;
     }
     const formData = new FormData();
@@ -479,11 +474,11 @@ const downloadExecutive = async () => {
         formData.append('executiveReportFilename', executiveReportFilename);
         console.log("filename:", executiveReportFilename);
       } else {
-        toast.error("Error retrieving original filename", { autoClose: 1500 });
+        toast.error("Error retrieving original filename", { autoClose: 2000 });
         return;
       }
     } else {
-      toast.error("No record found for selected evidence", { autoClose: 1500 });
+      toast.error("No record found for selected evidence", { autoClose: 2000 });
       return;
     }
     console.log("formData before sending file:", formData);
@@ -509,30 +504,29 @@ const downloadExecutive = async () => {
       }));
   
       console.log('Executive report successfully uploaded', data.file_path);
-      toast.success('Executive report successfully uploaded', { autoClose: 1500 });
+      toast.success('Executive report successfully uploaded', { autoClose: 2000 });
     } catch (error) {
       console.error('Error requesting executive report upload', error);
-      toast.error('Error requesting executive report upload', { autoClose: 1500 });
+      toast.error('Error requesting executive report upload', { autoClose: 2000 });
     }
   };
 //----------------------------------------
   const uploadReports= async (e) => {
     e.preventDefault(); 
-    //para registrar reporst en consola
     if ( !formData2.fileTechnicalReport ) {
-      toast.error('Technical report not uploaded, select file and upload.', { autoClose: 1500 });
+      toast.error('Technical report not uploaded, select file and upload.', { autoClose: 2000 });
       return;
     }
     if (!file2) {
-        toast.error('No file selected', { autoClose: 1500 });
+        toast.error('No file selected', { autoClose: 2000 });
         return;
     }
     if ( !formData2.fileExecutiveReport ) {
-      toast.error('Executive report not uploaded, select file and upload.', { autoClose: 1500 });
+      toast.error('Executive report not uploaded, select file and upload.', { autoClose: 2000 });
       return;
     }
     if (!file3) {
-        toast.error('No file selected', { autoClose: 1500 });
+        toast.error('No file selected', { autoClose: 2000 });
         return;
     }
     console.log("prueba antes de cargar:", formData2);
@@ -554,7 +548,7 @@ const downloadExecutive = async () => {
     const selectDate = `${newStateUpdateDate}.${milliseconds}`;
 
     if (selectedEvidenceId === null) {
-      toast.error("No evidence selected", { autoClose: 1500 });
+      toast.error("No evidence selected", { autoClose: 2000 });
       return;
     }
 
@@ -646,7 +640,7 @@ const downloadExecutive = async () => {
     e.preventDefault();
     if( !formData2.userId || !formData2.names || !formData2.lastNames || 
       !formData2.userType){
-      toast.error('Please, fill all the fields', { autoClose: 1500 });
+      toast.error('Please, fill all the fields', { autoClose: 2000 });
       return;  
     }
     setFormData(prevState => ({
@@ -725,13 +719,9 @@ const downloadExecutive = async () => {
       getEvidenceData();
     }
   }, [tokenAuth]);
-  //----------------------------------------
-
 //---------------------------------------- 
 return (
-
   <div className='w-full flex  min-h-screen bg-[#010f1f]'>
-  
   {tokenAuth ? (
     <>
      {/* Section left   */}
@@ -1177,7 +1167,9 @@ return (
                     <option value="" disabled >Select a user type</option>
                     <option value="Forensic Expert">Forensic Expert</option>
                     <option value="Forensic Investigator">Forensic Investigator</option>
-                    <option value="Police Officer">Police Officer</option>                  
+                    <option value="Police Officer">Police Officer</option>
+                    <option value="Prosecutor">Prosecutor</option> 
+                    <option value="Judge">Judge</option>                  
                   </select>
                   <ChevronDownIcon
                     aria-hidden="true"
@@ -1483,7 +1475,7 @@ return (
               </button>
               <button
                 type="button"
-                onClick={() => setDownloadTechnical(false)}
+                onClick={() => setDownloadExecutive(false)}
                 className="rounded-md bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 Cancel

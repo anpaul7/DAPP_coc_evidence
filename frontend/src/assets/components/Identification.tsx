@@ -16,15 +16,12 @@ import {  FcButtingIn, FcDataProtection, FcDocument, FcFilingCabinet, FcFinePrin
 const API = import.meta.env.VITE_API_SERVER_FLASK;//URL server backend
 
 function Identification () {
-
   //const [evidenceFound, setEvidenceFound] = useState(null);// evidence registered in db
   const [tokenAuth, setTokenAuth] = useState('');//authentication token
   const { isConnected } = useAccount(); //conect to wallet
-
   //use in button on click
   const [isRegistering, setRegisterEvidence] = useState(false); //state transaction blockchain register evidence
   const {writeContractAsync} = useWriteContract(); //hub wagmi write in contract
-  
   // state hide and show forms
   const [showFirstForm, setShowFirstForm] = useState(true);  //show first form
   const [showSecondForm, setShowSecondForm] = useState(false); //hide second form
@@ -36,9 +33,7 @@ function Identification () {
 //----------------------------------------
   const [file, setFile] = useState<File | null>(null); // state file
   const [fileName, setFileName] = useState('');
-
   const [open, setOpen] = useState(false); //dialog register evidence
-
 //----------------------------------------
 //----- validation evidence exists in BD
   const registerAsk = async (e) => { //use in button on click register evidence
@@ -50,7 +45,6 @@ function Identification () {
     }
 
     try{
-
       const response = await fetch(`${API}/verify`, { //submit data to server
           method: 'POST',
           headers: {
@@ -71,17 +65,14 @@ function Identification () {
         if (!data.status) {
           setOpen(true);  // Evidence not exists, show dialog register
         } 
-        //setEvidenceFound(data.status);//true or false evidence exists
         console.log("Response if evidence exists in BD ?: ", data.status);
         console.log(data.status);    
         
     }catch(error){
         console.error('Error verifying evidence in BD:',error);
     }
-    //setOpen(true);// open dialog register evidence
   };
 //----------------------------------------
-
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
@@ -95,31 +86,31 @@ function Identification () {
     e.preventDefault(); // Prevent the default form submission behavior
 
     if (!isConnected) {
-      toast.error("Please connect your wallet", { autoClose: 1500 });
+      toast.error("Please connect your wallet", { autoClose: 2000 });
       return;
     }
 
     if (!file) {
-      toast.error('No file selected', { autoClose: 1500 });
+      toast.error('No file selected', { autoClose: 2000 });
       return;
     }
     if ( !formData2.caseNumber || !formData2.location ||
       !formData2.device || !formData2.evidenceType ) {
-      toast.error('Please, fill all the fields', { autoClose: 1500 });
+      toast.error('Please, fill all the fields', { autoClose: 2000 });
       return;
     }
     //validate file extension
     const nameParts = file.name.split('.');
     const ext = nameParts.pop();
     if (!ext) {
-      toast.error('The file does not have an extension', { autoClose: 1500 });
+      toast.error('The file does not have an extension', { autoClose: 2000 });
       return;
     }
     const fileExtension = `.${ext.toLowerCase()}`;
     const extensionE = formData2.evidenceType.toLowerCase();
 
     if (fileExtension !== extensionE) {
-      toast.error(`Incorrect selection of the file extension type.`, { autoClose: 1500 });
+      toast.error(`Incorrect selection of the file extension type.`, { autoClose: 2000 });
       return;
     }
     const formData = new FormData();
@@ -181,14 +172,12 @@ function Identification () {
       toast.error('Error requesting file upload');
     }
   };
-
-  //----------------------------------------
+//----------------------------------------
   const [formData2, setFormData] = useState({
     caseNumber:'',
     location:'',
     device:'',
     evidenceType:'',
-
     userType: '',
     userId: '',
     names: '',
@@ -196,7 +185,6 @@ function Identification () {
     filePath: '',
     hashEvidence: '',
     registrationDate: '',
-
     methodAdquisition: '',
     noteEvidence: '',
   });
@@ -219,7 +207,6 @@ function Identification () {
       evidenceType:'',
       filePath: '',
       registrationDate: '',
-
       methodAdquisition: '',
       noteEvidence: '',
       userId: '',
@@ -231,7 +218,6 @@ function Identification () {
 
     setFile(null);
     setFileName('');
-
     // hide and show forms
     setTimeout(() => {
       setShowFirstForm(true);
@@ -273,16 +259,16 @@ function Identification () {
         return;
   }
     
-    setTimeout(() => {
-      setShowFirstForm(false);  // Hide the first form
-      setShowSecondForm(false);  // Show the second form
-      setShowThirdForm(true);
-    }, 1000); // 4 seconds 
-    console.log(formData2);
-    toast.success("Next to Step 3", { autoClose: 1000 });
-    setShowLeftSection(false);
-    setShowLeftSectionTwo(false);
-    setShowLeftSectionThree(true);  
+  setTimeout(() => {
+    setShowFirstForm(false);  // Hide the first form
+    setShowSecondForm(false);  // Show the second form
+    setShowThirdForm(true);
+  }, 1000); 
+  console.log(formData2);
+  toast.success("Next to Step 3", { autoClose: 1000 });
+  setShowLeftSection(false);
+  setShowLeftSectionTwo(false);
+  setShowLeftSectionThree(true);  
   };
   //----------------------------------------
   const submitNewEvidence = async (e) => {
@@ -292,8 +278,6 @@ function Identification () {
     setOpen(false);
 
     try {
-
-      /*
       const evidenceData = [
         [0, parseInt(formData2.caseNumber), formData2.location, 
           formData2.device, formData2.evidenceType, formData2.filePath, 
@@ -308,12 +292,12 @@ function Identification () {
         ]
       ];
 
-        const currentTxHash = await writeContractAsync({
-        address: contractAddress_DE_deploy, //address of the contract deployed
-        abi,
-        functionName: "createEvidence", //function to call on the contract
-        args: evidenceData, //args to pass 
-        });
+      const currentTxHash = await writeContractAsync({
+      address: contractAddress_DE_deploy, //address of the contract deployed
+      abi,
+      functionName: "createEvidence", //function to call on the contract
+      args: evidenceData, //args to pass 
+      });
       
       if (!currentTxHash || !currentTxHash.startsWith('0x')) {
         console.error("Invalid transaction hash:", currentTxHash);
@@ -326,7 +310,6 @@ function Identification () {
         hash: currentTxHash, //hash of the transaction written
       });
 
-      //----------------------------------------
       //extract currentId from event transaction receipt
       const provider = new ethers.BrowserProvider(window.ethereum);
       const contract = new ethers.Contract(contractAddress_DE_deploy, abi, provider);
@@ -347,10 +330,6 @@ function Identification () {
       } else {
         console.log("Event 'createdED' not found in logs.",currentId);
       }
-
-      */
-      const currentTxHash ="0x0";
-      const currentId = 100;
       handleInsertDB(currentTxHash, currentId); 
       setRegisterEvidence(false);
 
@@ -365,9 +344,8 @@ function Identification () {
     }
     setRegisterEvidence(false);
   };
-  //---------------------------------
- 
-  //---- insert data digital evidence to database
+//---------------------------------
+//---- insert data digital evidence to database
   const handleInsertDB = async (_blockchainTxHash: string, _currentId: number) => { 
     try{
       const nameUser = localStorage.getItem("user"); 
@@ -804,7 +782,8 @@ return (
                     <option value="Forensic Expert">Forensic Expert</option>
                     <option value="Forensic Investigator">Forensic Investigator</option>
                     <option value="Police Officer">Police Officer</option>
-                    
+                    <option value="Prosecutor">Prosecutor</option> 
+                    <option value="Judge">Judge</option>  
                   </select>
                   <ChevronDownIcon
                     aria-hidden="true"
