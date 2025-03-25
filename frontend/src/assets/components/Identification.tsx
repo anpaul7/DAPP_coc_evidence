@@ -410,8 +410,8 @@ return (
     <>
      {/* Section left   */}
      {showLeftSection && (
-        <div className="w-[20%] flex flex-col items-center justify-center bg-neutral-900 text-white ">
-          <div className="mb-4 mt-[-20px]">
+        <div className="w-[20%] flex flex-col items-start bg-neutral-900 text-white ">
+          <div className="mb-4 px-4 mt-10">
             <h2 className="text-2xl font-semibold text-white text-center">
               Phase 1. Identification</h2><br/>
               <h3 className='text-center text-gray-400 text-lg '>
@@ -429,8 +429,8 @@ return (
       )}
   {/*----------------------------*/}
       {showLeftSectionTwo && (
-        <div className="w-[20%] flex flex-col items-center justify-center bg-neutral-900 text-white p-8 ">
-        <div className="mb-4 mt-[-20px]">
+        <div className="w-[20%] flex flex-col items-start bg-neutral-900 text-white p-8 ">
+        <div className="mb-4 px-4 mt-10">
           <h2 className="text-2xl font-semibold text-white text-center">
             Phase 2. Acquisition</h2><br/>
             <h3 className='text-center text-gray-400 text-lg '>
@@ -528,38 +528,35 @@ return (
                     </label>
                     
                     <div className="mt-2 flex justify-center space-x-6 max-w-[95%]">
-                        {[
-                          { value: "Computer", label: "Computer" },
-                          { value: "Laptop", label: "Laptop" },
-                          { value: "Hard disk", label: "Hard disk" },
-                          { value: "USB", label: "USB" },
-                          { value: "Cell phone", label: "Cell phone" },
-                          { value: "Tablet", label: "Tablet" }
-                        ].map((option) => (
-                          <div key={option.value} className="flex flex-col items-center">
-                            <input
-                              id="device"
-                              type="checkbox"
-                              name="device"
-                              value={option.value}
-                              checked={formData2.device === option.value}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setFormData({ ...formData2, device: option.value });
-                                } else {
-                                  setFormData({ ...formData2, device: "" });
-                                }
-                              }}
-                              className="w-5 h-5 text-blue-600 border-2 border-gray-400 checked:border-blue-600 checked:bg-blue-600"
-                               />
-                            <span className="mt-1 text-sm text-gray-900 text-center">{option.label}</span>
-                          </div>
-                        ))}
-                      </div>  
-                    </div>
-
-                
-
+                      {[
+                        { value: "Computer", label: "Computer" },
+                        { value: "Laptop", label: "Laptop" },
+                        { value: "Hard disk", label: "Hard disk" },
+                        { value: "USB", label: "USB" },
+                        { value: "Cell phone", label: "Cell phone" },
+                        { value: "Tablet", label: "Tablet" }
+                      ].map((option) => (
+                        <div key={option.value} className="flex flex-col items-center">
+                          <input
+                            id="device"
+                            type="checkbox"
+                            name="device"
+                            value={option.value}
+                            checked={formData2.device === option.value}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFormData({ ...formData2, device: option.value });
+                              } else {
+                                setFormData({ ...formData2, device: "" });
+                              }
+                            }}
+                            className="w-5 h-5 text-blue-600 border-2 border-gray-400 checked:border-blue-600 checked:bg-blue-600"
+                              />
+                          <span className="mt-1 text-sm text-gray-900 text-center">{option.label}</span>
+                        </div>
+                      ))}
+                    </div>  
+                  </div>
                 <div className="form-group border-b border-gray-300 pb-7">
                     <label htmlFor="evidenceType" className="text-2xl font-semibold text-lg text-gray-700">
                       Type of evidence

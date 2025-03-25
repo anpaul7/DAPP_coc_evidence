@@ -56,16 +56,14 @@ function Presentation() {
   const [downloadConfirmOpen, setDownloadConfirmOpen] = useState(false);
   const [confirmDownloadTechnical, setDownloadTechnical] = useState(false);
   const [confirmDownloadExecutive, setDownloadExecutive] = useState(false);
-  const [nextPhaseConfirmOpen, setNextPhaseConfirmOpen] = useState(false);
+  const [sentenceConfirmOpen, setSentenceConfirmOpen] = useState(false);
 //----------------------------------------
   const [formData2, setFormData] = useState({
     userId: '',
     names: '',
     lastNames: '',
     userType: '',
-    fileTechnicalReport: '',
-    fileExecutiveReport: '',
-    decision: '',
+    decision: ''
   });
 //----------------------------------------
   const handleChange = (e) => {
@@ -83,6 +81,7 @@ const clearForm = () => { // clear box data form to default
     names: '',
     lastNames: '',
     userType: "",
+    decision: ''
   }));
 };
 const clearForm2 = () => { // clear box data form to default
@@ -521,9 +520,9 @@ const downloadExecutive = async () => {
     setShowUploadForm(false);
   }
   //----------------------------------------
-  const nextPhase2 = async () => {
+  const setSentence = async () => {
     const newPhase = "Presentation"; 
-    const newState = "Judicial Validation";
+    const newState = formData2.decision;
     const newStateUpdateDate = new Date().toLocaleString('es-ES', {
       timeZone: 'America/Bogota'
     });
@@ -540,9 +539,8 @@ const downloadExecutive = async () => {
       const currentTxHash = await writeTx3({
         address: contractAddress_DE_deploy,
         abi,
-        functionName: "updatePresentationPhase",
-        args: [selectedEvidenceId, newPhase, newState, selectDate, 
-          formData2.fileTechnicalReport, formData2.fileExecutiveReport],
+        functionName: "updatePhase",
+        args: [selectedEvidenceId, newPhase, newState, selectDate],
       });
 
       if (!currentTxHash || !currentTxHash.startsWith("0x")) {
@@ -555,13 +553,12 @@ const downloadExecutive = async () => {
         confirmations: 1,
         hash: currentTxHash,
       });
- 
-     toast.success("Phase updated successfully", { autoClose: 2000 });
+
+     //let currentTxHash = "0x123";
+     toast.success("Sentence recordedsuccessfully", { autoClose: 2000 });
      console.log("Data form: ", formData2, selectDate);
-     handleUpdateDB2(selectedEvidenceId, newPhase, newState, selectDate, 
-      formData2.fileTechnicalReport, formData2.fileExecutiveReport, currentTxHash);
+     handleUpdateDB3(selectedEvidenceId, newPhase, newState, selectDate, currentTxHash);
      clearForm();// clear box data form  
-     clearForm2();
      await getEvidenceData(); //update table 1
     } catch (error) {
       console.error("Error updating phase:", error);
@@ -569,14 +566,13 @@ const downloadExecutive = async () => {
     }
   };
   //----------------------------------------
-  const handleUpdateDB2 = async (_selectedEvidenceId: number,
+  const handleUpdateDB3 = async (_selectedEvidenceId: number,
     _newPhase: string, _newState: string, _selectDate: string, 
-    _technicalReport: string, _executiveReport: string, 
     _blockchainTxHash: string) => { 
     
     const nameUser = localStorage.getItem("user"); 
     try{  
-      const response = await fetch(`${API}/updateEvidence2/${_selectedEvidenceId}`, { //submit data to server
+      const response = await fetch(`${API}/updateEvidence/${_selectedEvidenceId}`, { //submit data to server
           method: 'PUT',
           headers: {
             "Authorization": `Bearer ${tokenAuth}`,
@@ -592,8 +588,6 @@ const downloadExecutive = async () => {
             lastNames: formData2.lastNames,
             userType: formData2.userType,
             nameUser: nameUser,
-            technicalReport: _technicalReport,
-            executiveReport: _executiveReport,
             blockchainTxHash: _blockchainTxHash //hash of the transaction registered evidence in blockchain         
           })
         });
@@ -621,7 +615,7 @@ const downloadExecutive = async () => {
   const handleNextPhaseButton = (e) => {
     e.preventDefault();
     if( !formData2.userId || !formData2.names || !formData2.lastNames || 
-      !formData2.userType){
+      !formData2.userType || !formData2.decision){
       toast.error('Please, fill all the fields', { autoClose: 2000 });
       return;  
     }
@@ -630,15 +624,16 @@ const downloadExecutive = async () => {
       userId: formData2.userId,
       names: formData2.names,
       lastNames: formData2.lastNames,
-      userType: formData2.userType
+      userType: formData2.userType,
+      decision: formData2.decision
     }));
-    setNextPhaseConfirmOpen(true);
+    setSentenceConfirmOpen(true);
   };
   //----------------------------------------
-  const confirmNextPhase = async (e) => {
+  const confirmSentence= async (e) => {
     e.preventDefault();
-    setNextPhaseConfirmOpen(false);
-    await nextPhase2(); // Call update2 data blockchain
+    setSentenceConfirmOpen(false);
+    await setSentence(); // Call update2 data blockchain
     await getEvidenceData(); //update table 1
     
     setShowBlockchainTable(false);
@@ -699,8 +694,8 @@ return (
     <>
      {/* Section left   */}
      {showLeftSection && (
-        <div className="w-[20%] flex flex-col items-center justify-center bg-neutral-900 text-white ">
-          <div className="mb-4 mt-[-20px]">
+        <div className="w-[20%] flex flex-col items-start bg-neutral-900 text-white ">
+          <div className="mb-4 px-5 mt-10">
             <h2 className="text-2xl font-semibold text-white text-center">
               Phase 5. Presentation</h2><br/>
               <h3 className='text-center text-gray-400 text-lg '>
@@ -1060,7 +1055,7 @@ return (
               <label htmlFor="decision" className="text-base/7 font-semibold text-gray-900 ">
                 Select decision:
               </label>
-              <div className="mt-2 flex justify-center space-x-6 max-w-[95%]">
+              <div className="mt-2 flex justify-center space-x-6 max-w-[95%] border border-dashed rounded-lg border-gray-500 px-6 py-3">
                 {[
                   { value: "Accepted", label: "Accepted" },
                   { value: "Not Accepted", label: "Not Accepted" },
@@ -1083,7 +1078,8 @@ return (
                 ))}
               </div>
             </div>
-
+            <h3 className="text-center text-2xl font-semibold text-lg text-gray-700">
+              Information of the judge in charge of the sentence </h3>      
 
               <div className="form-group border-b border-gray-300 pb-4">
                 <label htmlFor="userId" className="text-base/7 font-semibold text-gray-900 ">
@@ -1198,7 +1194,7 @@ return (
               rounded-md px-3 py-2 text-sm-md font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               onClick={handleNextPhaseButton}
             >
-              Sentence  
+              Sentence 
             </button>
           </div>
       </form>
@@ -1403,8 +1399,8 @@ return (
   </Dialog>
 {/* --- Next Phase Modal */}
     <Dialog
-      open={nextPhaseConfirmOpen}
-      onClose={() => setNextPhaseConfirmOpen(false)}
+      open={sentenceConfirmOpen}
+      onClose={() => setSentenceConfirmOpen(false)}
       className="relative z-10"
     >
       <DialogBackdrop
@@ -1424,11 +1420,11 @@ return (
                 </div>
                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                   <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
-                    Next Phase
+                   Confirm judgment evidence
                   </DialogTitle>
                   <div className="mt-2">
                     <p className="text-lg text-gray-500">
-                    Do you want to shift digital evidence to the Presentation Phase?
+                      Do you want to close the case and confirm the sentence?
                       <br />
                       Click on confirm.
                     </p>
@@ -1439,14 +1435,14 @@ return (
             <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:space-x-4 sm:space-x-reverse sm:px-6 justify-center items-center">
               <button
                 type="button"
-                onClick={confirmNextPhase}
+                onClick={confirmSentence}
                 className="bg-primary-600 text-white hover:bg-primary-700 rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 Confirm
               </button>
               <button
                 type="button"
-                onClick={() => setNextPhaseConfirmOpen(false)}
+                onClick={() => setSentenceConfirmOpen(false)}
                 className="rounded-md bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 Cancel

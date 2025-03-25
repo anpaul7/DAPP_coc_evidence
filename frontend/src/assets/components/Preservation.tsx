@@ -354,15 +354,13 @@ const {
 
 //---------------------------------------- 
 return (
-
   <div className='w-full flex  min-h-screen bg-[#010f1f]'>
-  
   {tokenAuth ? (
     <>
      {/* Section left   */}
      {showLeftSection && (
-        <div className="w-[20%] flex flex-col items-center justify-center bg-neutral-900 text-white ">
-          <div className="mb-4 mt-[-20px]">
+        <div className="w-[20%] flex flex-col items-start bg-neutral-900 text-white ">
+          <div className="mb-4 px-4 mt-10">
             <h2 className="text-2xl font-semibold text-white text-center">
               Phase 3. Preservation</h2><br/>
               <h3 className='text-center text-gray-400 text-lg '>
