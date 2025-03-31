@@ -5,9 +5,9 @@ import { waitForTransactionReceipt } from 'wagmi/actions';
 import { config } from '../../main';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { FcDocument, FcFinePrint, FcFolder,  FcManager,  FcReuse } from 'react-icons/fc';
+import { FcDocument, FcEditImage, FcFinePrint, FcManager,  FcReadingEbook} from 'react-icons/fc';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
-import { ChevronDownIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, ChevronDownIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
 const API = import.meta.env.VITE_API_SERVER_FLASK;//URL server backend
 
@@ -736,10 +736,10 @@ return (
           <div className="mb-4">     
           </div>
 
-          <div className="flex justify-center gap-1 mt-2">
-            <FcReuse className="size-20"/>
+          <div className="flex w-full justify-center gap-1 mt-2">
+            <FcReadingEbook className="size-20"/>
+            <FcEditImage className="size-10"/>
             <FcFinePrint className="size-10" />
-            <FcFolder className="size-10" />
           </div>
         </div>
       )}
@@ -771,7 +771,7 @@ return (
         <div className="inline-block min-w-full py-1 ">
           <div className="overflow-x-auto overflow-y-auto max-h-[320px] border border-gray-200 shadow dark:border-gray-700 dark:bg-gray-800">
             <table className="min-w-[1400px] divide-y divide-gray-200">
-              <thead className="sticky top-0 z-10 border-b bg-[#455a64] font-medium text-white dark:border-neutral-500 dark:bg-neutral-900">
+              <thead className="sticky top-0 z-10 border-b bg-[#448AFF] font-medium text-white dark:border-neutral-500 dark:bg-neutral-900">
                 <tr>
                 <th className="sticky left-0 z-20 w-16 px-1 py-3 text-start text-base font-medium text-white uppercase">
                   Select ID
@@ -810,62 +810,62 @@ return (
                         />
                       </div>
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-base font-medium text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg font-medium text-gray-800">
                       {dataE._id}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-base text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.caseNumber}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-base text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.transactions && dataE.transactions.length > 0
                         ? dataE.transactions[dataE.transactions.length - 1].phase
                         : ""}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-base text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.transactions && dataE.transactions.length > 0
                           ? dataE.transactions[dataE.transactions.length - 1].state
                           : ""}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.transactions && dataE.transactions.length > 0
                             ? dataE.transactions[dataE.transactions.length - 1].txDate
                             : ""}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.evidenceType}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.filePath}
                     </td>
-                    <td className="px-3 py-4  whitespace-pre-wrap break-words text-sm text-gray-800">
+                    <td className="px-3 py-4  whitespace-pre-wrap break-words text-lg text-gray-800">
                       {dataE.hashEvidence}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.methodAdquisition}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.noteEvidence}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-base text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.location}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.device}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.userId}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.names+" "+dataE.lastNames}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-3 py-4 whitespace-nowrap text-lg text-gray-800">
                       {dataE.userType}
                     </td>
                   </tr>
                 ))
                 ) : (
                   <tr>
-                    <td colSpan={12} className="px-6 py-4 text-center text-sm text-gray-500">
+                    <td colSpan={12} className="px-6 py-4 text-center text-lg text-gray-500">
                       No evidence found.
                     </td>
                   </tr>
@@ -921,12 +921,12 @@ return (
               <div className="inline-block min-w-full py-2">
                 <div className="overflow-hidden border border-gray-200 shadow dark:border-gray-700 dark:bg-gray-800">
                   <table className="w-full divide-y divide-gray-200">
-                    <thead className="sticky top-0 z-10 border-b bg-[#455a64] text-white">
+                    <thead className="sticky top-0 z-10 border-b bg-[#448AFF] text-white">
                     <tr>
-                      <th className="px-3 py-3 text-start text-base font-medium uppercase">
+                      <th className="px-3 py-3 text-start text-lg font-medium uppercase">
                         Description
                       </th>
-                      <th className="px-3 py-3 text-start text-base font-medium uppercase">
+                      <th className="px-3 py-3 text-start text-lg font-medium uppercase">
                         Evidence data recorded on the blockchain
                       </th>
                     </tr>
@@ -934,10 +934,10 @@ return (
                     <tbody>
                       {blockchainEvidence.map((item, index) => (
                         <tr key={index} className="odd:bg-white even:bg-gray-100 hover:bg-blue-50">
-                          <td className="px-3 py-4 text-base text-gray-800">
+                          <td className="px-3 py-4 text-lg text-gray-800">
                             Information {index + 1}
                           </td>
-                          <td className="px-3 py-4 text-base text-gray-800">
+                          <td className="px-3 py-4 text-lg text-gray-800">
                             {Object.entries(item).map(([key, value]) => (
                               <div key={key}>
                                 <strong>{key}:</strong> {String(value)}
@@ -1013,15 +1013,15 @@ return (
                       <div className="inline-block min-w-full py-2">
                         <div className="overflow-hidden border border-gray-200 shadow dark:border-gray-700 dark:bg-gray-800">
                           <table className="w-full divide-y divide-gray-200">
-                            <thead className="sticky top-0 z-10 border-b bg-[#455a64] text-white">
+                            <thead className="sticky top-0 z-10 border-b bg-[#448AFF] text-white">
                               <tr>
-                                <th className="px-3 py-3 text-start text-base font-medium uppercase">
+                                <th className="px-3 py-3 text-start text-lg font-medium uppercase">
                                 Transaction
                                 </th>
-                                <th className="px-3 py-3 text-start text-base font-medium uppercase">
+                                <th className="px-3 py-3 text-start text-lg font-medium uppercase">
                                 Description Data
                                 </th>
-                                <th className="px-3 py-3 text-start text-base font-medium uppercase">
+                                <th className="px-3 py-3 text-start text-lg font-medium uppercase">
                                   Action
                                 </th>
                               </tr>
@@ -1029,10 +1029,10 @@ return (
                             <tbody>
                               {record.transactions.map((tx, i) => (
                                 <tr key={i} className="odd:bg-white even:bg-gray-100 hover:bg-blue-50">
-                                  <td className="px-3 py-4 text-base text-gray-800">
+                                  <td className="px-3 py-4 text-lg text-gray-800">
                                     Transaction {i}
                                   </td>
-                                  <td className="px-3 py-4 text-base text-gray-800">
+                                  <td className="px-3 py-4 text-lg text-gray-800">
                                     {Object.entries(tx).map(([key, value]) => (
                                       <div key={key}>
                                         <strong>{key}:</strong> {String(value)}
@@ -1042,7 +1042,10 @@ return (
                                   <td className="px-3 py-4 whitespace-nowrap text-end text-sm font-medium">
                                     <button
                                       type="button"
-                                      className="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 focus:outline-none focus:text-blue-800 disabled:opacity-50 disabled:pointer-events-none"
+                                      onClick={() =>
+                                        window.open(`https://sepolia.arbiscan.io/tx/${tx.blockchainTxHash}`, "_blank")
+                                      }
+                                      className="inline-flex items-center gap-x-2 text-lg font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 focus:outline-none focus:text-blue-800 disabled:opacity-50 disabled:pointer-events-none"
                                     >
                                       Verify
                                     </button>
@@ -1338,7 +1341,7 @@ return (
             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
               <div className="sm:flex sm:items-start">
                 <div className="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                  <InformationCircleIcon aria-hidden="true" className="h-6 w-6 text-blue-600" />
+                <CheckCircleIcon aria-hidden="true" className="size-6 text-green-600" />
                 </div>
                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                   <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
@@ -1394,7 +1397,7 @@ return (
             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
               <div className="sm:flex sm:items-start">
                 <div className="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                  <InformationCircleIcon aria-hidden="true" className="h-6 w-6 text-blue-600" />
+                <CheckCircleIcon aria-hidden="true" className="size-6 text-green-600" />
                 </div>
                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                   <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
@@ -1449,7 +1452,7 @@ return (
             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
               <div className="sm:flex sm:items-start">
                 <div className="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                  <InformationCircleIcon aria-hidden="true" className="h-6 w-6 text-blue-600" />
+                  <CheckCircleIcon aria-hidden="true" className="size-6 text-green-600" />
                 </div>
                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                   <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
@@ -1504,7 +1507,7 @@ return (
             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
               <div className="sm:flex sm:items-start">
                 <div className="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                  <InformationCircleIcon aria-hidden="true" className="h-6 w-6 text-blue-600" />
+                  <CheckCircleIcon aria-hidden="true" className="size-6 text-green-600" />
                 </div>
                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                   <DialogTitle as="h3" className="text-lg font-semibold text-gray-900">

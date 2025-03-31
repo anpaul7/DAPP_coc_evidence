@@ -351,16 +351,16 @@ def registerEvidence():
 def updateEvidence(id):
 
     data = request.get_json() #get data from json
-
-    if not data.get('id'):
+  
+    if data.get('id') is None:
         return jsonify({"error": "The 'id' field isn't present"}), 400
     
     if int(data.get('id')) != id:
-        return jsonify({"error": "The id in the URL and in the JSON do not match"}), 400
+        return jsonify({"error": "The id in the URL and in the JSON do not match"}), 401
     
     existing_data = collection.find_one({ "_id": int(data['id'])})
     if not existing_data:
-        return jsonify({"error": "The 'id' not exists"}), 400
+        return jsonify({"error": "The 'id' not exists"}), 402
 
     update_fields = {
         "phase": data.get("phase"),
@@ -404,15 +404,15 @@ def updateEvidence2(id):
 
     data = request.get_json() #get data from json
 
-    if not data.get('id'):
+    if data.get('id') is None:
         return jsonify({"error": "The 'id' field isn't present"}), 400
     
     if int(data.get('id')) != id:
-        return jsonify({"error": "The id in the URL and in the JSON do not match"}), 400
+        return jsonify({"error": "The id in the URL and in the JSON do not match"}), 401
     
     existing_data = collection.find_one({ "_id": int(data['id'])})
     if not existing_data:
-        return jsonify({"error": "The 'id' not exists"}), 400
+        return jsonify({"error": "The 'id' not exists"}), 402
 
     update_fields = {
         "phase": data.get("phase"),

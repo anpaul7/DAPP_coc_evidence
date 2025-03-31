@@ -1,0 +1,35 @@
+Mar 30 21:10:41 admin systemd: pam_unix(systemd-user:session): session opened for user gdm(uid=128) by (uid=0)
+Mar 30 21:10:50 admin polkitd(authority=local): Registered Authentication Agent for unix-session:c1 (system bus name :1.40 [/usr/bin/gnome-shell], object path /org/freedesktop/PolicyKit1/AuthenticationAgent, locale en_US.UTF-8)
+Mar 30 21:11:02 admin gdm-password]: gkr-pam: unable to locate daemon control file
+Mar 30 21:11:02 admin gdm-password]: gkr-pam: stashed password to try later in open session
+Mar 30 21:11:02 admin gdm-password]: pam_unix(gdm-password:session): session opened for user pablo(uid=1000) by (uid=0)
+Mar 30 21:11:02 admin systemd-logind[907]: New session 2 of user pablo.
+Mar 30 21:11:02 admin systemd: pam_unix(systemd-user:session): session opened for user pablo(uid=1000) by (uid=0)
+Mar 30 21:11:02 admin gdm-password]: gkr-pam: gnome-keyring-daemon started properly and unlocked keyring
+Mar 30 21:11:04 admin gnome-keyring-daemon[1634]: The PKCS#11 component was already initialized
+Mar 30 21:11:04 admin gnome-keyring-daemon[1634]: The SSH agent was already initialized
+Mar 30 21:11:04 admin gnome-keyring-daemon[1634]: The Secret Service was already initialized
+Mar 30 21:11:06 admin polkitd(authority=local): Registered Authentication Agent for unix-session:2 (system bus name :1.78 [/usr/bin/gnome-shell], object path /org/freedesktop/PolicyKit1/AuthenticationAgent, locale en_US.UTF-8)
+Mar 30 21:11:10 admin gdm-launch-environment]: pam_unix(gdm-launch-environment:session): session closed for user gdm
+Mar 30 21:11:10 admin systemd-logind[907]: Session c1 logged out. Waiting for processes to exit.
+Mar 30 21:11:11 admin systemd-logind[907]: Removed session c1.
+Mar 30 21:11:11 admin polkitd(authority=local): Unregistered Authentication Agent for unix-session:c1 (system bus name :1.40, object path /org/freedesktop/PolicyKit1/AuthenticationAgent, locale en_US.UTF-8) (disconnected from bus)
+Mar 30 21:11:17 admin PackageKit: uid 1000 is trying to obtain org.freedesktop.packagekit.system-sources-refresh auth (only_trusted:0)
+Mar 30 21:11:17 admin PackageKit: uid 1000 obtained auth for org.freedesktop.packagekit.system-sources-refresh
+Mar 30 21:11:36 admin PackageKit: uid 1000 is trying to obtain org.freedesktop.packagekit.system-sources-refresh auth (only_trusted:0)
+Mar 30 21:11:36 admin PackageKit: uid 1000 obtained auth for org.freedesktop.packagekit.system-sources-refresh
+Mar 30 21:11:39 admin PackageKit: uid 1000 is trying to obtain org.freedesktop.packagekit.system-sources-refresh auth (only_trusted:0)
+Mar 30 21:11:39 admin PackageKit: uid 1000 obtained auth for org.freedesktop.packagekit.system-sources-refresh
+Mar 30 21:12:10 admin pkexec: pam_unix(polkit-1:session): session opened for user root(uid=0) by (uid=1000)
+Mar 30 21:12:10 admin pkexec[5014]: pablo: Executing command [USER=root] [TTY=unknown] [CWD=/home/pablo] [COMMAND=/usr/lib/update-notifier/package-system-locked]
+Mar 30 21:14:34 admin gnome-keyring-daemon[1634]: asked to register item /org/freedesktop/secrets/collection/login/1, but it's already registered
+Mar 30 21:16:04 admin gnome-keyring-daemon[1634]: asked to register item /org/freedesktop/secrets/collection/login/1, but it's already registered
+Mar 30 21:17:01 admin CRON[5812]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Mar 30 21:17:01 admin CRON[5812]: pam_unix(cron:session): session closed for user root
+Mar 30 21:30:01 admin CRON[7255]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Mar 30 21:30:01 admin CRON[7255]: pam_unix(cron:session): session closed for user root
+Mar 30 22:17:01 admin CRON[7790]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Mar 30 22:17:01 admin CRON[7790]: pam_unix(cron:session): session closed for user root
+Mar 30 22:18:47 admin gdm-password]: gkr-pam: unlocked login keyring
+Mar 30 22:30:01 admin CRON[8210]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Mar 30 22:30:01 admin CRON[8210]: pam_unix(cron:session): session closed for user root

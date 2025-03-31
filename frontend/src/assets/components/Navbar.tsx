@@ -8,11 +8,11 @@ import { jwtDecode, JwtPayload } from 'jwt-decode';
 import { useDisconnect } from 'wagmi';
 
 const navigation = [
-  { name: 'Home', href: '/', current: true, roles: ['administrator', 'forense', 'lawyer','judge','user' ] },
-  { name: 'Identification', href: '/identification', roles: ['administrator','forense'] },
+  { name: 'Home', href: '/', current: true, roles: ['administrator', 'forense','judge','user' ] },
+  { name: 'Acquisition', href: '/acquisition', roles: ['administrator','forense'] },
   { name: 'Preservation', href: '/preservation', roles: ['administrator', 'forense', ] },
-  { name: 'Analysis', href: '/analysis', roles: ['administrator', 'forense', 'lawyer'] }, 
-  { name: 'Presentation', href: '/presentation', roles: ['administrator','forense','judge', ] },   
+  { name: 'Analysis', href: '/analysis', roles: ['administrator', 'forense', ] }, 
+  { name: 'Presentation', href: '/presentation', roles: ['administrator','judge', ] },   
 ]
 
 function classNames(...classes: (string | boolean)[]): string {

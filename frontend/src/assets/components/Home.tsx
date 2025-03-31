@@ -28,16 +28,7 @@ function Home({ tokenAuth, setTokenAuth, setUser, setRole}: HomeProps) {
           headers:{
               'Content-Type':'application/json'
           },
-          body: JSON.stringify({ user, password
-              
-            /*
-            "user":"pedro", "password":"e10adc3949ba59abbe56e057f20f883e",
-            "id":123, "name":"Pedross", "lastNames":"Perez", 
-            "user":"pedro", "password":"123456", "role":"administrator"
-
-            "id":456, "name":"Juan", "lastNames":"Torres", 
-            "user":"juan", "password":"456", "role":"administrator"
-            */          
+          body: JSON.stringify({ user, password         
           })
         });
 
@@ -79,7 +70,7 @@ function Home({ tokenAuth, setTokenAuth, setUser, setRole}: HomeProps) {
     args: [], //args to pass to the function, args: [address],
   })
 //--------------------------------
-  // authentication component initialization page
+// authentication component initialization page
   useEffect(() => {  
     const storedToken = localStorage.getItem("authToken");
     if (storedToken) {
